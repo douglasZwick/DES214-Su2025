@@ -53,6 +53,14 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     }
   }
 
+  private enum RoomType
+  {
+    Starting,
+    Standard,
+    Hook,
+    Turn,
+  }
+
   public List<RoomData> m_RoomPrefabs = new();
 
   public int m_SetupRoomCount = 3;
@@ -67,12 +75,12 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   void Start()
   {
-    AddStartingRoom();
-    BuildGoldenPath();
+    var startingConnection = AddStartingRoomDataToPath();
+    BuildGoldenPath(startingConnection);
   }
 
 
-  RoomData PickRandom(IEnumerable<RoomData> collection)
+  T PickRandom<T>(IEnumerable<T> collection)
   {
     var list = collection.ToList();
     var index = Random.Range(0, list.Count);
@@ -110,38 +118,69 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
-  void Add(RoomData roomPrefab, Vector2Int index)
+  Connection AddStartingRoomDataToPath()
   {
-    var roomWasAdded = m_Grid.TryAdd(index, roomPrefab);
+    var direction = PickRandomDirection();
+    var startingConnection = new Connection(Vector2Int.zero, direction);
 
-    if (!roomWasAdded)
-    {
-      // TODO:
-      // Complain if there was already something there
-    }
+    AddConnectionToPath(startingConnection);
+    ++m_TotalLength;
 
-    var newConnections = Connection.From(roomPrefab, index);
-    m_ToDo.AddRange(newConnections);
+    return startingConnection;
   }
 
 
-  Connection AddStartingRoom()
+  Connection AddHookRoomDataToPath(Connection fromConnection)
   {
-    var direction = PickRandomDirection();
+    var destinationIndex = fromConnection.Destination;
+    var newDirection = PickRandomDirection(fromConnection.m_Direction);
 
-    var filteredPrefabs =
-      from prefab in m_RoomPrefabs
-      where prefab.m_Tags.m_Origin && prefab.m_Doors.Has(direction)
-      select prefab;
-    var selectedPrefab = PickRandom(filteredPrefabs);
+    // TODO:
+    //   validate
 
-    AddToPath(selectedPrefab, Vector2Int.zero);
+    var newConnection = new Connection(destinationIndex, newDirection);
+    AddHookConnectionToPath(newConnection);
 
+    return newConnection;
+  }
+
+
+  Connection AddTurnRoomDataToPath(Connection fromConnection)
+  {
+    var destinationIndex = fromConnection.Destination;
+    var newDirection = PickRandomDirection(fromConnection.m_Direction);
+
+    // TODO:
+    //   validate
+
+    var newConnection = new Connection(destinationIndex, newDirection);
+    AddHookConnectionToPath(newConnection);
+
+    return newConnection;
+  }
+
+
+  Connection AddRoomDataToPath(RoomType type, Connection fromConnection = null)
+  {
+    if (type == RoomType.Starting)
+    {
+      var direction = PickRandomDirection();
+      var startingConnection = new Connection(Vector2Int.zero, direction);
+
+      AddConnectionToPath(startingConnection);
+      ++m_TotalLength;
+    }
+    var destinationIndex = fromConnection.Destination;
+    var newDirection = PickRandomDirection(fromConnection.m_Direction);
+
+    // TODO:
+    //   validate
+
+    var newConnection = new Connection(destinationIndex, newDirection);
+    AddConnectionToPath(newConnection);
     ++m_TotalLength;
 
-    var connection = new Connection(Vector2Int.zero, direction);
-
-    return connection;
+    return newConnection;
   }
 
 
@@ -166,6 +205,41 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
+  void AddConnectionToPath(Connection connection)
+  {
+    // var destinationIndex = connection.Destination;
+    // TODO:
+    //   validate the destination
+
+    var newRoomData = new RoomData(connection);
+    m_Grid.Add(connection.m_Source, newRoomData);
+  }
+
+
+  void AddHookConnectionToPath(Connection connection)
+  {
+    // var destinationIndex = connection.Destination;
+    // TODO:
+    //   validate the destination
+
+    var newRoomData = new RoomData(connection);
+    newRoomData.m_Tags.m_Hook = true;
+    m_Grid.Add(connection.m_Source, newRoomData);
+  }
+
+
+  void AddTurnConnectionToPath(Connection connection)
+  {
+    // var destinationIndex = connection.Destination;
+    // TODO:
+    //   validate the destination
+
+    var newRoomData = new RoomData(connection);
+    newRoomData.m_Tags.m_Turn = true;
+    m_Grid.Add(connection.m_Source, newRoomData);
+  }
+
+
   void AddToPath(RoomData roomData, Vector2Int index)
   {
     var roomWasAdded = m_Grid.TryAdd(index, roomData);
@@ -178,36 +252,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
-  void BuildGoldenPath()
+  void BuildGoldenPath(Connection nextConnection)
   {
-    BuildSetup();
-    BuildDev1();
-    BuildDev2();
-    BuildDev3();
-  }
-
-
-  void BuildSetup()
-  {
-
-  }
-
-
-  void BuildDev1()
-  {
-
-  }
-
-
-  void BuildDev2()
-  {
-
-  }
-
-
-  void BuildDev3()
-  {
-
   }
 }
 
