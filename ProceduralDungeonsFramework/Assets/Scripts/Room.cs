@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using System;
 
 public class Room : MonoBehaviour
 {
@@ -67,15 +67,43 @@ public class RoomData
   [HideInInspector]
   public Vector2Int m_Index = new();
   [HideInInspector]
-  public RoomData m_PathLink;
+  public RoomData m_Next;
+  [HideInInspector]
+  public RoomData m_Prev;
 
 
   public RoomData() { }
 
 
-  public RoomData(PhasedGridDungeonBuilder.Connection connection)
+  public RoomData(Vector2Int index)
+  {
+    m_Index = index;
+  }
+
+
+  public RoomData(Connection connection)
   {
     m_Index = connection.m_Source;
     m_Doors.Set(connection.m_Direction);
+  }
+
+
+  public Direction GetDirectionToNext()
+  {
+    var currIndex = m_Index;
+    var nextIndex = m_Next.m_Index;
+    var offset = nextIndex - currIndex;
+
+    return PhasedGridDungeonBuilder.ConvertOffsetToDirection(offset);
+  }
+
+
+  public Direction GetDirectionToPrev()
+  {
+    var currIndex = m_Index;
+    var prevIndex = m_Prev.m_Index;
+    var offset = prevIndex - currIndex;
+
+    return PhasedGridDungeonBuilder.ConvertOffsetToDirection(offset);
   }
 }
