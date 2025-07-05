@@ -32,18 +32,18 @@ public class RoomData
     {
       switch (direction)
       {
-        default:  // N
-          m_N = true;
-          break;
-        case Direction.S:
-          m_S = true;
-          break;
-        case Direction.E:
-          m_E = true;
-          break;
-        case Direction.W:
-          m_W = true;
-          break;
+      default:  // N
+        m_N = true;
+        break;
+      case Direction.S:
+        m_S = true;
+        break;
+      case Direction.E:
+        m_E = true;
+        break;
+      case Direction.W:
+        m_W = true;
+        break;
       }
     }
   }
@@ -59,6 +59,7 @@ public class RoomData
     public bool m_Dev3 = false;
     public bool m_Turn = false;
     public bool m_Resolution = false;
+    public bool m_Tunnel = false;
   }
 
   public DoorData m_Doors = new();
@@ -70,6 +71,8 @@ public class RoomData
   public RoomData m_Next;
   [HideInInspector]
   public RoomData m_Prev;
+  [HideInInspector]
+  public ArcPhase m_Phase = ArcPhase.Setup;
 
 
   public RoomData() { }
