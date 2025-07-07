@@ -2,10 +2,21 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Enum = System.Enum;
+using System.Text;
+using System;
+using Random = UnityEngine.Random;
 
 
 public class PhasedGridDungeonBuilder : MonoBehaviour
 {
+  public enum DebuggingLevel
+  {
+    Off,
+    Basic,
+    Detail,
+    Verbose,
+  }
+
   public List<RoomData> m_RoomPrefabs = new();
 
   public int m_SetupRoomCount = 3;
@@ -13,6 +24,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   public int m_Dev2RoomCount = 6;
   public int m_Dev3RoomCount = 7;
   public int m_ResolutionCount = 1;
+
+  public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
 
   private Dictionary<Vector2Int, RoomData> m_Grid = new();
   private List<RoomData> m_GoldenPath = new();
@@ -74,7 +87,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     CarveGoldenPath();
     CarveExtras();
 
-    
+    PrintGrid();
   }
 
 
@@ -83,17 +96,35 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   /// </summary>
   void CarveGoldenPath()
   {
-    CarveStartingSlot();
+    Log("Carving golden path...");
+
+    CarveStartingSlots();
 
     while (m_GoldenPath.Count < TargetPathLength)
       CarveNextSlot();
   }
 
 
-  RoomData CarveStartingSlot()
+  /// <summary>
+  /// Carves and connects two slots, so that the golden path will be guaranteed
+  ///   to have more than one item in it, which is needed for CarveNextSlot to
+  ///   iterate properly.
+  /// </summary>
+  void CarveStartingSlots()
   {
+    Log($"  Carving starting slot...", DebuggingLevel.Detail);
+    Log($"    Carving at {Vector2Int.zero}", DebuggingLevel.Detail);
+    Log($"      Sweeping the floor...", DebuggingLevel.Verbose);
+
     var newSlot = new RoomData(Vector2Int.zero);
-    return Carve(newSlot, Vector2Int.zero);
+    var startingRoom = Carve(newSlot, Vector2Int.zero);
+
+    var nextDirection = PickRandomDirection();
+    var nextOffset = ConvertDirectionToOffset(nextDirection);
+
+    Log($"    Carving second slot at {nextOffset}", DebuggingLevel.Detail);
+
+    ConnectAlongGoldenPath(startingRoom, nextOffset);
   }
 
 
@@ -104,6 +135,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   {
     // The "current" slot is the last one in the list
     var currSlot = m_GoldenPath[^1];
+    Log($"  Carving slot after {currSlot.m_Index}...", DebuggingLevel.Detail);
 
     // Here are all the directions in which we could possibly take our next
     //   step. We start the list with everything except the direction that
@@ -113,6 +145,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     //   iteratively
     var availableDirections = new List<Direction>();
     var directionToPrev = currSlot.GetDirectionToPrev();
+    Log($"    (Can't go {directionToPrev})", DebuggingLevel.Verbose);
     foreach (var direction in (Direction[])Enum.GetValues(typeof(Direction)))
       if (direction != directionToPrev)
         availableDirections.Add(direction);
@@ -131,6 +164,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       var nextDirection = PickRandom(availableDirections);
       var nextOffset = ConvertDirectionToOffset(nextDirection);
 
+      Log($"    Trying {nextDirection}:", DebuggingLevel.Verbose);
+
       // Since the actual offset will never be zero, we can use Vector2Int.zero
       //   to indicate that we haven't already overwritten it
       if (firstPickedOffset == Vector2Int.zero)
@@ -139,16 +174,23 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       var nextIndex = currSlot.m_Index + nextOffset;
 
       // If there's already something there,
-      if (m_Grid[nextIndex] != null)
+      if (m_Grid.TryGetValue(nextIndex, out _))
       {
+        Log($"      {nextDirection} failed.", DebuggingLevel.Verbose);
+
         // ...pull that direction out of the list and try again
         availableDirections.Remove(nextDirection);
         continue;
       }
 
+      Log($"      {nextDirection} succeeded!", DebuggingLevel.Verbose);
+
       // At this point, we've found an index that will work
       return ConnectAlongGoldenPath(currSlot, nextIndex);
     } while (availableDirections.Count > 0);
+
+    Log($"    All directions from {currSlot.m_Index} failed. Tunneling:",
+      DebuggingLevel.Detail);
 
     // If we reached the end of the loop without returning, then it's because
     //   we couldn't find a direction to go in that wouldn't collide with an
@@ -158,8 +200,16 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     // The tunnel will go in the direction of our first pick, which we've saved
     //   from above. To find the destination, we'll just walk the grid in that
     //   direction until we find a vacant spot.
-    while (m_Grid[tunnelDestinationIndex] != null)
+    while (m_Grid.TryGetValue(tunnelDestinationIndex, out _))
+    {
+      Log($"      Can't stop at {tunnelDestinationIndex}",
+        DebuggingLevel.Verbose);
+
       tunnelDestinationIndex += firstPickedOffset;
+    }
+
+    Log($"      Found vacant spot at {tunnelDestinationIndex}",
+      DebuggingLevel.Verbose);
 
     // At this point, we've found an index that will work
     return ConnectByTunnel(currSlot, tunnelDestinationIndex);
@@ -168,6 +218,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   RoomData ConnectAlongGoldenPath(RoomData from, Vector2Int destIndex)
   {
+    Log($"      Connecting from {from.m_Index} to {destIndex}:",
+      DebuggingLevel.Verbose);
+
     var dest = new RoomData(destIndex);
     dest.m_Prev = from;
     from.m_Next = dest;
@@ -178,6 +231,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex)
   {
+    Log($"      Connecting from {from.m_Index} to {destIndex}:",
+      DebuggingLevel.Verbose);
+
     var dest = ConnectAlongGoldenPath(from, destIndex);
     dest.m_Tags.m_Tunnel = true;
 
@@ -187,6 +243,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   RoomData Carve(RoomData newSlot, Vector2Int index)
   {
+    Log($"        Carving new slot at {index}...",
+      DebuggingLevel.Verbose);
+
     // TODO: should I validate here? Anywhere??
 
     m_GoldenPath.Add(newSlot);
@@ -196,6 +255,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     //   CurrentPhase getter uses the length of the path to determine the 
     //   current phase, so it updates automatically
     newSlot.m_Phase = CurrentPhase;
+
+    Log($"          {CurrentPhase} slot carved.",
+      DebuggingLevel.Verbose);
 
     return newSlot;
   }
@@ -257,23 +319,115 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   {
     switch (exclusion)
     {
-    default:    // N
-      return (Direction)Random.Range(1, 4);
-    case Direction.S:
+      default:    // N
+        return (Direction)Random.Range(1, 4);
+      case Direction.S:
+        {
+          var r = Random.Range(0, 3);
+          if (r == 0) return Direction.N;
+          return (Direction)(r + 1);
+        }
+      case Direction.E:
+        {
+          var r = Random.Range(0, 3);
+          if (r == 2) return Direction.W;
+          return (Direction)r;
+        }
+      case Direction.W:
+        return (Direction)Random.Range(0, 3);
+    }
+  }
+
+
+  void PrintGrid()
+  {
+    if (!DebuggingAt(DebuggingLevel.Basic)) return;
+
+    var minXIndex = int.MaxValue;
+    var maxXIndex = int.MinValue;
+    var minYIndex = int.MaxValue;
+    var maxYIndex = int.MinValue;
+
+    foreach (var kvp in m_Grid)
     {
-      var r = Random.Range(0, 3);
-      if (r == 0) return Direction.N;
-      return (Direction)(r + 1);
+      if (kvp.Key.x < minXIndex)
+        minXIndex = kvp.Key.x;
+      else if (kvp.Key.x > maxXIndex)
+        maxXIndex = kvp.Key.x;
+
+      if (kvp.Key.y < minYIndex)
+        minYIndex = kvp.Key.y;
+      else if (kvp.Key.y > maxYIndex)
+        maxYIndex = kvp.Key.y;
     }
-    case Direction.E:
+
+    var gridW = maxXIndex - minXIndex;
+    var gridH = maxYIndex - minYIndex;
+    var xShift = minXIndex < 0 ? -minXIndex : 0;
+    var yShift = minYIndex < 0 ? -minYIndex : 0;
+
+    var outputSb = new StringBuilder();
+
+    for (var y = 0; y < gridH; ++y)
+      for (var x = 0; x < gridW; ++x)
+        outputSb.Append("▪️");
+
+    foreach (var kvp in m_Grid)
     {
-      var r = Random.Range(0, 3);
-      if (r == 2) return Direction.W;
-      return (Direction)r;
+      var x = kvp.Key.x + xShift;
+      var y = kvp.Key.y + yShift;
+      var offset = x + y * (gridW + 1);
+      var roomChar = (kvp.Value.m_Phase switch
+      {
+        ArcPhase.Setup        => "⬜",
+        ArcPhase.Hook         => "🟦",
+        ArcPhase.Development1 => "🟩",
+        ArcPhase.Development2 => "🟨",
+        ArcPhase.Development3 => "🟧",
+        ArcPhase.Turn         => "🟥",
+        _                     => "🟪",
+      })[0];
+      outputSb[offset] = roomChar;
     }
-    case Direction.W:
-      return (Direction)Random.Range(0, 3);
+
+    for (var y = gridH - 1; y > 0; --y)
+    {
+      var index = gridW * y;
+      outputSb.Insert(index, Environment.NewLine);
     }
+
+    outputSb.Append(Environment.NewLine);
+
+    var outputStr = "Grid string:" + Environment.NewLine + outputSb.ToString();
+    Debug.Log(outputStr);
+    Debug.Log($"gridW: {gridW} | gridH: {gridH}");
+  }
+
+
+  void Log(object message, DebuggingLevel level = DebuggingLevel.Basic)
+  {
+    if (DebuggingAt(level))
+      Debug.Log(message);
+  }
+
+
+  void Warn(object message, DebuggingLevel level = DebuggingLevel.Basic)
+  {
+    if (DebuggingAt(level))
+      Debug.LogWarning(message);
+  }
+
+
+  void Error(object message, DebuggingLevel level = DebuggingLevel.Basic)
+  {
+    if (DebuggingAt(level))
+      Debug.LogError(message);
+  }
+  
+
+  bool DebuggingAt(DebuggingLevel level)
+  {
+    return (int)m_DebuggingLevel >= (int)level;
   }
 }
 
