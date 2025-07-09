@@ -17,13 +17,23 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     Verbose,
   }
 
-  public List<RoomData> m_RoomPrefabs = new();
+  public List<Frame> m_FramePrefabs = new();
+  public List<Room> m_InteriorPrefabs = new();
 
-  public int m_SetupRoomCount = 3;
-  public int m_Dev1RoomCount = 5;
-  public int m_Dev2RoomCount = 6;
-  public int m_Dev3RoomCount = 7;
-  public int m_ResolutionCount = 1;
+  public Vector2 m_RoomSize = new(16, 11);
+
+  // TODO: Create a custom editor for this class, which will let me edit this
+  //   dictionary in the inspector
+  public Dictionary<ArcPhase, int> m_RoomCounts = new()
+  {
+    { ArcPhase.Setup, 4 },
+    { ArcPhase.Hook, 1 },
+    { ArcPhase.Development1, 8 },
+    { ArcPhase.Development2, 12 },
+    { ArcPhase.Development3, 10 },
+    { ArcPhase.Turn, 3 },
+    { ArcPhase.Resolution, 1 },
+  };
 
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
 
@@ -33,61 +43,39 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   {
     get
     {
-      var phaseLength = m_SetupRoomCount;
+      var runningTotal = 0;
+      var roomCount = m_GoldenPath.Count;
 
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Setup;
+      foreach (var kvp in m_RoomCounts)
+      {
+        runningTotal += kvp.Value;
 
-      ++phaseLength;
+        if (roomCount <= runningTotal)
+          return kvp.Key;
+      }
 
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Hook;
-
-      phaseLength += m_Dev1RoomCount;
-
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Development1;
-
-      phaseLength += m_Dev2RoomCount;
-
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Development2;
-
-      phaseLength += m_Dev3RoomCount;
-
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Development3;
-
-      ++phaseLength;
-
-      if (m_GoldenPath.Count <= phaseLength)
-        return ArcPhase.Turn;
+      Error("Error in determining current phase: reached the end of the " +
+        "m_RoomCounts dictionary and we still haven't placed " +
+       $"{roomCount} rooms! Returning ArcPhase.Resolution by default.");
 
       return ArcPhase.Resolution;
     }
   }
 
-  private int TargetPathLength
+  private int ComputeTargetPathLength()
   {
-    get
-    {
-      return m_SetupRoomCount + // For the setup
-             1 +                // For the hook
-             m_Dev1RoomCount +  // For development 1
-             m_Dev2RoomCount +  // For development 2
-             m_Dev3RoomCount +  // For development 3
-             1 +                // For the turn
-             m_ResolutionCount; // For the resolution
-    }
+    return m_RoomCounts.Values.Sum();
   }
 
 
   void Start()
   {
     CarveGoldenPath();
-    CarveExtras();
+    // CarveExtras();
 
     PrintGrid();
+
+    BuildRooms();
   }
 
 
@@ -100,7 +88,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
     CarveStartingSlots();
 
-    while (m_GoldenPath.Count < TargetPathLength)
+    var targetPathLength = ComputeTargetPathLength();
+
+    while (m_GoldenPath.Count < targetPathLength)
       CarveNextSlot();
   }
 
@@ -218,12 +208,62 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   RoomData ConnectAlongGoldenPath(RoomData from, Vector2Int destIndex)
   {
-    Log($"      Connecting from {from.m_Index} to {destIndex}:",
+    var fromIndex = from.m_Index;
+
+    Log($"      Connecting from {fromIndex} to {destIndex}:",
       DebuggingLevel.Verbose);
 
     var dest = new RoomData(destIndex);
     dest.m_Prev = from;
     from.m_Next = dest;
+
+    // We need to tell the RoomData where its doors should and shouldn't be. We
+    //   determine this by comparing indices:
+    //   - If the indices differ by more than 1 on either axis, then this is a
+    //     tunnel connection, and we shouldn't change anything about the doors.
+    //   - Otherwise:
+    //     - If they're equal on the X axis, then this is a N-S connection
+    //     - Otherwise this is an E-W connection
+    //   Once we know which doorways we need, we set them: one on this RoomData
+    //     and the other on the other
+
+    var indexDiff = destIndex - fromIndex;
+    var isTunnel = Math.Abs(indexDiff.x) > 1 || Math.Abs(indexDiff.y) > 1;
+
+    if (!isTunnel)
+    {
+      // N-S
+      if (indexDiff.x == 0)
+      {
+        // If the Y diff is greater than 0, then destIndex is N of fromIndex.
+        //   This means dest has a S door and from has an N door.
+        if (indexDiff.y > 0)
+        {
+          dest.m_Doors.m_S = true;
+          from.m_Doors.m_N = true;
+        }
+        else  // Otherwise, reverse that
+        {
+          dest.m_Doors.m_N = true;
+          from.m_Doors.m_S = true;
+        }
+      }
+      else  // E-W
+      {
+        // If the X diff is greater than 0, then destIndex is E of fromIndex.
+        //   This means dest has a W door and from has an E door.
+        if (indexDiff.x > 0)
+        {
+          dest.m_Doors.m_W = true;
+          from.m_Doors.m_E = true;
+        }
+        else  // Otherwise, reverse that
+        {
+          dest.m_Doors.m_E = true;
+          from.m_Doors.m_W = true;
+        }
+      }
+    }
 
     return Carve(dest, destIndex);
   }
@@ -231,9 +271,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex)
   {
-    Log($"      Connecting from {from.m_Index} to {destIndex}:",
-      DebuggingLevel.Verbose);
-
     var dest = ConnectAlongGoldenPath(from, destIndex);
     dest.m_Tags.m_Tunnel = true;
 
@@ -301,6 +338,24 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
+  void BuildRooms()
+  {
+    foreach (var kvp in m_Grid)
+    {
+      var index = kvp.Key;
+      var roomPosition2d = index * m_RoomSize;
+      var roomPosition = new Vector3(roomPosition2d.x, roomPosition2d.y);
+
+      // For now we're just using the one and only frame prefab, but we'll
+      //   replace this later
+      var frame = Instantiate(m_FramePrefabs[0],
+        roomPosition, Quaternion.identity);
+
+      frame.BlockSetupForDoorData(kvp.Value.m_Doors);
+    }
+  }
+
+
   T PickRandom<T>(IEnumerable<T> collection)
   {
     var list = collection.ToList();
@@ -361,46 +416,56 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
         maxYIndex = kvp.Key.y;
     }
 
-    var gridW = maxXIndex - minXIndex;
-    var gridH = maxYIndex - minYIndex;
+    var gridW = maxXIndex - minXIndex + 1;
+    var gridH = maxYIndex - minYIndex + 1;
     var xShift = minXIndex < 0 ? -minXIndex : 0;
     var yShift = minYIndex < 0 ? -minYIndex : 0;
 
-    var outputSb = new StringBuilder();
-
+    var gridAsArray = new string[gridH][];
     for (var y = 0; y < gridH; ++y)
-      for (var x = 0; x < gridW; ++x)
-        outputSb.Append("▪️");
+    {
+      var row = new string[gridW];
+      Array.Fill(row, ". ");
+      gridAsArray[y] = row;
+    }
 
     foreach (var kvp in m_Grid)
     {
       var x = kvp.Key.x + xShift;
       var y = kvp.Key.y + yShift;
-      var offset = x + y * (gridW + 1);
-      var roomChar = (kvp.Value.m_Phase switch
-      {
-        ArcPhase.Setup        => "⬜",
-        ArcPhase.Hook         => "🟦",
-        ArcPhase.Development1 => "🟩",
-        ArcPhase.Development2 => "🟨",
-        ArcPhase.Development3 => "🟧",
-        ArcPhase.Turn         => "🟥",
-        _                     => "🟪",
-      })[0];
-      outputSb[offset] = roomChar;
+      var gridString = GetGridStringFromRoomData(kvp.Value);
+      gridAsArray[y][x] = gridString;
     }
 
-    for (var y = gridH - 1; y > 0; --y)
-    {
-      var index = gridW * y;
-      outputSb.Insert(index, Environment.NewLine);
-    }
+    var outputSb = new StringBuilder();
+    foreach (var row in gridAsArray)
+      outputSb.AppendLine(string.Join("", row));
 
-    outputSb.Append(Environment.NewLine);
-
-    var outputStr = "Grid string:" + Environment.NewLine + outputSb.ToString();
+    var outputStr = $"Grid W: {gridW}, H: {gridH}" + Environment.NewLine +
+      outputSb.ToString();
     Debug.Log(outputStr);
-    Debug.Log($"gridW: {gridW} | gridH: {gridH}");
+  }
+
+
+  string GetGridStringFromRoomData(RoomData roomData)
+  {
+    var str = roomData.m_Phase switch
+    {
+      ArcPhase.Setup        => "<color=#ffffff>S </color>",
+      ArcPhase.Hook         => "<color=#80c0ff>H </color>",
+      ArcPhase.Development1 => "<color=#80ffc0>D1</color>",
+      ArcPhase.Development2 => "<color=#f0e020>D2</color>",
+      ArcPhase.Development3 => "<color=#f0a040>D3</color>",
+      ArcPhase.Turn         => "<color=#f02040>T </color>",
+      _                     => "<color=#a020e0>R </color>",
+    };
+
+    if (roomData.IsStart || roomData.IsEnd)
+    {
+      str = $"<b>{str}</b>";
+    }
+
+    return str;
   }
 
 

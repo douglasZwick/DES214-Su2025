@@ -74,6 +74,11 @@ public class RoomData
   [HideInInspector]
   public ArcPhase m_Phase = ArcPhase.Setup;
 
+  public bool IsStart
+  { get { return m_Prev == null; }}
+  public bool IsEnd
+  { get { return m_Next == null; }}
+
 
   public RoomData() { }
 
