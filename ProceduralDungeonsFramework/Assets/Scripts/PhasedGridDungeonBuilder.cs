@@ -7,6 +7,7 @@ using System;
 using Random = UnityEngine.Random;
 
 
+[RequireComponent(typeof(Dungeon))]
 public class PhasedGridDungeonBuilder : MonoBehaviour
 {
   public enum DebuggingLevel
@@ -19,8 +20,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   public List<Frame> m_FramePrefabs = new();
   public List<Room> m_InteriorPrefabs = new();
-
-  public Vector2 m_RoomSize = new(16, 11);
 
   // TODO: Create a custom editor for this class, which will let me edit this
   //   dictionary in the inspector
@@ -37,7 +36,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
 
-  private Dictionary<Vector2Int, RoomData> m_Grid = new();
+  private Dictionary<Vector2Int, RoomData> m_Grid;
+  private Vector2 m_RoomSize;
   private List<RoomData> m_GoldenPath = new();
   private ArcPhase CurrentPhase
   {
@@ -68,7 +68,17 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
-  void Start()
+  void Awake()
+  {
+    var dungeon = GetComponent<Dungeon>();
+    m_Grid = dungeon.m_Grid;
+    m_RoomSize = dungeon.m_RoomSize;
+
+    dungeon.e_BuildRequest += OnBuildRequest;
+  }
+
+
+  void OnBuildRequest()
   {
     CarveGoldenPath();
     // CarveExtras();
@@ -451,13 +461,13 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   {
     var str = roomData.m_Phase switch
     {
-      ArcPhase.Setup        => "<color=#ffffff>S </color>",
-      ArcPhase.Hook         => "<color=#80c0ff>H </color>",
+      ArcPhase.Setup => "<color=#ffffff>S </color>",
+      ArcPhase.Hook => "<color=#80c0ff>H </color>",
       ArcPhase.Development1 => "<color=#80ffc0>D1</color>",
       ArcPhase.Development2 => "<color=#f0e020>D2</color>",
       ArcPhase.Development3 => "<color=#f0a040>D3</color>",
-      ArcPhase.Turn         => "<color=#f02040>T </color>",
-      _                     => "<color=#a020e0>R </color>",
+      ArcPhase.Turn => "<color=#f02040>T </color>",
+      _ => "<color=#a020e0>R </color>",
     };
 
     if (roomData.IsStart || roomData.IsEnd)
@@ -488,7 +498,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     if (DebuggingAt(level))
       Debug.LogError(message);
   }
-  
+
 
   bool DebuggingAt(DebuggingLevel level)
   {

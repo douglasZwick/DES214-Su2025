@@ -95,10 +95,15 @@ public class HeroStats : MonoBehaviour
 
         //Spawn main camera
         var cam = Instantiate(MainCameraPrefab);
-        cam.GetComponent<ObjectFollow>().ObjectToFollow = transform;
+        var objectFollow = cam.GetComponent<ObjectFollow>();
+        if (objectFollow)
+            objectFollow.ObjectToFollow = transform;
+        var gridCamera = cam.GetComponent<GridCamera>();
+        if (gridCamera)
+            gridCamera.m_FollowTarget = transform;
 
         //Initialize stats
-        MaxHealth = StartingHealth;
+            MaxHealth = StartingHealth;
         Health = MaxHealth;
         SilverKeys = StartingSilverKeys;
         GoldKeys = StartingGoldKeys;
