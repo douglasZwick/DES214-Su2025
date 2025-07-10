@@ -119,6 +119,43 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &520870181 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1251368257008023425, guid: fc37f8548e748f04f99984295524785e,
+    type: 3}
+  m_PrefabInstance: {fileID: 1504041359}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &520870184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 520870181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: f11bc3307cb06f44d86b985b4623fc17,
+    type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Gamepad
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!850595691 &1082484957
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -188,6 +225,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 642814178074718499, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      propertyPath: m_MoveAction.m_Name
+      value: Move
+      objectReference: {fileID: 0}
     - target: {fileID: 1251368257008023425, guid: fc37f8548e748f04f99984295524785e,
         type: 3}
       propertyPath: m_Name
@@ -243,10 +285,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7508853311565033528, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      propertyPath: m_AttackAction.m_Name
+      value: Attack
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508853311565033528, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      propertyPath: m_AttackAction.m_SingletonActionBindings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508853311565033528, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      propertyPath: m_AttackAction.m_SingletonActionBindings.Array.data[0].m_Id
+      value: bd4f9eaa-bdd8-4688-9773-9bd978e9b876
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508853311565033528, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      propertyPath: m_AttackAction.m_SingletonActionBindings.Array.data[0].m_Action
+      value: Attack
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1251368257008023425, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      insertIndex: 5
+      addedObject: {fileID: 520870184}
   m_SourcePrefab: {fileID: 100100000, guid: fc37f8548e748f04f99984295524785e, type: 3}
 --- !u!1 &1518111460
 GameObject:
