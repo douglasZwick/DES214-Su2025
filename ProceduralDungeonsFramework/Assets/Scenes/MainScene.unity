@@ -156,6 +156,42 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &520870185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 520870181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e2e4cd3246b3f4e9b5657523bb37a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Events:
+    m_DamageRequested:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 520870185}
+          m_TargetAssemblyTypeName: Health, Assembly-CSharp
+          m_MethodName: OnDamageRequested
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    m_TookDamage:
+      m_PersistentCalls:
+        m_Calls: []
+    m_DealtDamage:
+      m_PersistentCalls:
+        m_Calls: []
+  m_MaxHp: 48
+  m_MercyDuration: 1
 --- !u!850595691 &1082484957
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -313,6 +349,10 @@ PrefabInstance:
         type: 3}
       insertIndex: 5
       addedObject: {fileID: 520870184}
+    - targetCorrespondingSourceObject: {fileID: 1251368257008023425, guid: fc37f8548e748f04f99984295524785e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 520870185}
   m_SourcePrefab: {fileID: 100100000, guid: fc37f8548e748f04f99984295524785e, type: 3}
 --- !u!1 &1518111460
 GameObject:

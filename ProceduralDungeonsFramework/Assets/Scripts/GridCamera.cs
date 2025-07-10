@@ -39,6 +39,7 @@ public class GridCamera : MonoBehaviour
   {
     if (m_FollowTarget == null) return;
 
+    // TODO: Replace this with a more robust action system
     m_Tx.position = Vector3.Lerp(m_Tx.position, Destination, m_Interpolant);
   }
 
