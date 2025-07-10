@@ -1,9 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 [RequireComponent(typeof(HeroStats))]
+[RequireComponent(typeof(PlayerInput))]
 public class BasicAttack : MonoBehaviour
 {
   public BulletLogic m_BulletPrefab;
@@ -13,25 +14,32 @@ public class BasicAttack : MonoBehaviour
 
   Transform m_Tx;
   HeroStats m_HeroStats;
+  InputAction m_Attack;
+
   List<BulletLogic> m_Bullets = new();
 
   bool CanAttack { get { return m_Bullets.Count < m_MaxBullets; } }
-  bool FireKeyDown
-  {
-    get { return m_FireKeys.Any(key => Input.GetKeyDown(key)); }
-  }
 
 
   void Awake()
   {
     m_Tx = transform;
     m_HeroStats = GetComponent<HeroStats>();
+
+    var playerInput = GetComponent<PlayerInput>();
+    m_Attack = playerInput.actions.FindAction("Attack");
+  }
+
+
+  void Start()
+  {
+    m_Attack.Enable();
   }
 
 
   void Update()
   {
-    if (FireKeyDown)
+    if (m_Attack.triggered)
       AttemptAttack();
   }
 
