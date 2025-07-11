@@ -54,4 +54,10 @@ public class TopDownMover : MonoBehaviour
 
     m_Tx.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
   }
+
+
+  public void OnDied(HealthEventData healthEd)
+  {
+    m_Move.Disable();
+  }
 }

@@ -9,7 +9,7 @@ public class Health : MonoBehaviour
   {
     public HealthEvent m_DamageRequested;
     public HealthEvent m_TookDamage;
-    public HealthEvent m_DealtDamage;
+    public HealthEvent m_Died;
   }
 
   public Events m_Events;
@@ -20,6 +20,11 @@ public class Health : MonoBehaviour
   [SerializeField]
   float m_MercyDuration = 1;
   float m_MercyTimer = 0;
+
+  public int CurrentHp { get { return m_Hp; }}
+
+  // TODO: Probably add some way to check whether you're already dead, because I
+  //   foresee trouble without that
 
   bool MercyActive
   {
@@ -53,6 +58,8 @@ public class Health : MonoBehaviour
 
   public void OnDamageRequested(HealthEventData healthEd)
   {
+    healthEd.m_Target = this;
+
     AttemptDamage(healthEd);
   }
 
@@ -76,9 +83,12 @@ public class Health : MonoBehaviour
     // TODO: Consider a zero check, and maybe something unique happens if you
     //   take zero damage
 
+    healthEd.m_PreviousHp = m_Hp;
     m_Hp -= healthEd.m_DamageAmount;
+    healthEd.m_NewHp = m_Hp;
 
-    // TODO: Invoke an event to say this character was just damaged
+    m_Events.m_TookDamage.Invoke(healthEd);
+    healthEd.m_Source?.m_Events.m_DealtDamage.Invoke(healthEd);
 
     if (m_Hp <= 0)
     {
@@ -94,6 +104,9 @@ public class Health : MonoBehaviour
   void Die(HealthEventData healthEd)
   {
     // Something bad I guess
+
+    m_Events.m_Died.Invoke(healthEd);
+    healthEd.m_Source?.m_Events.m_ScoredKill.Invoke(healthEd);
   }
 
 
@@ -125,5 +138,10 @@ public class HealthEvent : UnityEvent<HealthEventData> { }
 public class HealthEventData
 {
   public int m_DamageAmount;
+  public int m_PreviousHp;
+  public int m_NewHp;
   public bool m_IgnoreMercy;
+  public Health m_Target;
+  public Character m_Source;
+  // public GameObject m_Instrument;
 }

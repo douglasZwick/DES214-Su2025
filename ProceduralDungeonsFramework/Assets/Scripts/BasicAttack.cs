@@ -4,19 +4,21 @@ using UnityEngine.InputSystem;
 
 
 [RequireComponent(typeof(HeroStats))]
+[RequireComponent(typeof(Character))]
 [RequireComponent(typeof(PlayerInput))]
 public class BasicAttack : MonoBehaviour
 {
-  public BulletLogic m_BulletPrefab;
+  public GameObject m_BulletPrefab;
+  public int m_BulletPower = 16;
   public float m_BulletSpeed = 8;
   public int m_MaxBullets = 3;
-  public List<KeyCode> m_FireKeys = new() { KeyCode.Space, KeyCode.Z, };
 
   Transform m_Tx;
   HeroStats m_HeroStats;
+  Character m_Character;
   InputAction m_Attack;
 
-  List<BulletLogic> m_Bullets = new();
+  List<GameObject> m_Bullets = new();
 
   bool CanAttack { get { return m_Bullets.Count < m_MaxBullets; } }
 
@@ -25,6 +27,7 @@ public class BasicAttack : MonoBehaviour
   {
     m_Tx = transform;
     m_HeroStats = GetComponent<HeroStats>();
+    m_Character = GetComponent<Character>();
 
     var playerInput = GetComponent<PlayerInput>();
     m_Attack = playerInput.actions.FindAction("Attack");
@@ -58,7 +61,8 @@ public class BasicAttack : MonoBehaviour
   {
     var bullet = Instantiate(m_BulletPrefab, m_Tx.position, m_Tx.rotation);
     bullet.GetComponent<Rigidbody2D>().linearVelocity = m_Tx.up * m_BulletSpeed;
-    bullet.Power = m_HeroStats.Power;
+    var damageOnCollide = bullet.GetComponent<DamageOnCollide>();
+    damageOnCollide.Setup(m_BulletPower, m_Character);
 
     m_Bullets.Add(bullet);
   }
@@ -66,12 +70,18 @@ public class BasicAttack : MonoBehaviour
 
   void BulletCleanup()
   {
-    var newList = new List<BulletLogic>();
+    var newList = new List<GameObject>();
 
     foreach (var bullet in m_Bullets)
       if (bullet != null)
         newList.Add(bullet);
 
     m_Bullets = newList;
+  }
+
+
+  public void OnDied(HealthEventData healthEd)
+  {
+    m_Attack.Disable();
   }
 }
