@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5630795857048488811}
   - component: {fileID: 3602945067612338814}
   - component: {fileID: 3190103843020051966}
+  - component: {fileID: -5170921882085026588}
   m_Layer: 0
   m_Name: Bullet
   m_TagString: Untagged
@@ -80,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 400315509b8a96f44bef05c5c9842af6, type: 3}
-  m_Color: {r: 0.6679738, g: 1, b: 0.5019608, a: 1}
+  m_Color: {r: 0.6666667, g: 1, b: 0.5019608, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -147,7 +148,7 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -168,3 +169,15 @@ MonoBehaviour:
   m_DamageAmount: 0
   m_Ablative: 0
   m_Team: 1
+--- !u!114 &-5170921882085026588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4461145405902830748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b3a0e1f932427747a1fd269c1004b0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

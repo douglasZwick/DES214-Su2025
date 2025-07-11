@@ -63,6 +63,8 @@ public class BasicAttack : MonoBehaviour
     bullet.GetComponent<Rigidbody2D>().linearVelocity = m_Tx.up * m_BulletSpeed;
     var damageOnCollide = bullet.GetComponent<DamageOnCollide>();
     damageOnCollide.Setup(m_BulletPower, m_Character);
+    var destroyOnCollide = bullet.GetComponent<DestroyOnCollide>();
+    destroyOnCollide.IgnoreTeam(m_Character);
 
     m_Bullets.Add(bullet);
   }

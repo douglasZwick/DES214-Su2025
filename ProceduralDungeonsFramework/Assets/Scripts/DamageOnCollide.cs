@@ -23,10 +23,22 @@ public class DamageOnCollide : MonoBehaviour
 
   void OnCollisionEnter2D(Collision2D collision)
   {
-    var otherHealth = collision.gameObject.GetComponent<Health>();
+    CollisionHandler(collision.gameObject);
+  }
+
+
+  void OnTriggerEnter2D(Collider2D collision)
+  {
+    CollisionHandler(collision.gameObject);
+  }
+
+
+  void CollisionHandler(GameObject other)
+  {
+    var otherHealth = other.GetComponent<Health>();
     if (!otherHealth) return;
 
-    var otherCharacter = collision.gameObject.GetComponent<Character>();
+    var otherCharacter = other.GetComponent<Character>();
     var otherTeam = otherCharacter ? otherCharacter.m_Team : Team.Neutral;
     if (!Character.CanDamage(m_Team, otherTeam)) return;
 

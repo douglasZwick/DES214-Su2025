@@ -45,6 +45,8 @@ public class Health : MonoBehaviour
 
   void Awake()
   {
+    m_Events.m_DamageRequested.AddListener(OnDamageRequested);
+
     m_Hp = m_MaxHp;
   }
 
