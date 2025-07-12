@@ -230,44 +230,72 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     // We need to tell the RoomData where its doors should and shouldn't be. We
     //   determine this by comparing indices:
     //   - If the indices differ by more than 1 on either axis, then this is a
-    //     tunnel connection, and we shouldn't change anything about the doors.
-    //   - Otherwise:
-    //     - If they're equal on the X axis, then this is a N-S connection
-    //     - Otherwise this is an E-W connection
+    //     tunnel connection, and we should set stairs instead of doors
+    //   - If they're equal on the X axis, then this is a N-S connection
+    //   - Otherwise this is an E-W connection
     //   Once we know which doorways we need, we set them: one on this RoomData
     //     and the other on the other
 
     var indexDiff = destIndex - fromIndex;
     var isTunnel = Math.Abs(indexDiff.x) > 1 || Math.Abs(indexDiff.y) > 1;
 
-    if (!isTunnel)
+    // N-S
+    if (indexDiff.x == 0)
     {
-      // N-S
-      if (indexDiff.x == 0)
+      // If the Y diff is greater than 0, then destIndex is N of fromIndex.
+      //   This means dest has a S door or stair and from has an N.
+      if (indexDiff.y > 0)
       {
-        // If the Y diff is greater than 0, then destIndex is N of fromIndex.
-        //   This means dest has a S door and from has an N door.
-        if (indexDiff.y > 0)
+        if (isTunnel)
+        {
+          dest.m_Stairs.m_S = true;
+          from.m_Stairs.m_N = true;
+        }
+        else
         {
           dest.m_Doors.m_S = true;
           from.m_Doors.m_N = true;
         }
-        else  // Otherwise, reverse that
+      }
+      else  // Otherwise, reverse that
+      {
+        if (isTunnel)
+        {
+          dest.m_Stairs.m_N = true;
+          from.m_Stairs.m_S = true;
+        }
+        else
         {
           dest.m_Doors.m_N = true;
           from.m_Doors.m_S = true;
         }
       }
-      else  // E-W
+    }
+    else  // E-W
+    {
+      // If the X diff is greater than 0, then destIndex is E of fromIndex.
+      //   This means dest has a W door or stair and from has an E.
+      if (indexDiff.x > 0)
       {
-        // If the X diff is greater than 0, then destIndex is E of fromIndex.
-        //   This means dest has a W door and from has an E door.
-        if (indexDiff.x > 0)
+        if (isTunnel)
+        {
+          dest.m_Stairs.m_W = true;
+          from.m_Stairs.m_E = true;
+        }
+        else
         {
           dest.m_Doors.m_W = true;
           from.m_Doors.m_E = true;
         }
-        else  // Otherwise, reverse that
+      }
+      else  // Otherwise, reverse that
+      {
+        if (isTunnel)
+        {
+          dest.m_Stairs.m_E = true;
+          from.m_Stairs.m_W = true;
+        }
+        else
         {
           dest.m_Doors.m_E = true;
           from.m_Doors.m_W = true;
@@ -362,6 +390,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
         roomPosition, Quaternion.identity);
 
       frame.BlockSetupForDoorData(kvp.Value.m_Doors);
+      frame.StairSetupForRoomData(kvp.Value);
     }
   }
 

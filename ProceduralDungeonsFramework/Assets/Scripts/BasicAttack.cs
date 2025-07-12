@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 
-[RequireComponent(typeof(HeroStats))]
 [RequireComponent(typeof(Character))]
 [RequireComponent(typeof(PlayerInput))]
 public class BasicAttack : MonoBehaviour
@@ -14,7 +13,6 @@ public class BasicAttack : MonoBehaviour
   public int m_MaxBullets = 3;
 
   Transform m_Tx;
-  HeroStats m_HeroStats;
   Character m_Character;
   InputAction m_Attack;
 
@@ -26,7 +24,6 @@ public class BasicAttack : MonoBehaviour
   void Awake()
   {
     m_Tx = transform;
-    m_HeroStats = GetComponent<HeroStats>();
     m_Character = GetComponent<Character>();
 
     var playerInput = GetComponent<PlayerInput>();

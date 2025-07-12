@@ -13,11 +13,11 @@ GameObject:
   - component: {fileID: 1251368257008023436}
   - component: {fileID: 1251368257008023437}
   - component: {fileID: 2550964935392149354}
-  - component: {fileID: 1251368257008023439}
+  - component: {fileID: 5511520330804121984}
   - component: {fileID: 3940479755811753668}
   - component: {fileID: 642814178074718499}
   - component: {fileID: 7508853311565033528}
-  - component: {fileID: 5511520330804121984}
+  - component: {fileID: 6048878650217040083}
   m_Layer: 0
   m_Name: Hero
   m_TagString: Player
@@ -37,7 +37,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8345363657868724670}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1251368257008023435
@@ -178,7 +179,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   m_Team: 1
---- !u!114 &1251368257008023439
+--- !u!114 &5511520330804121984
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -187,17 +188,57 @@ MonoBehaviour:
   m_GameObject: {fileID: 1251368257008023425}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66950c6e84a2056468ce040fdfb21396, type: 3}
+  m_Script: {fileID: 11500000, guid: 16e2e4cd3246b3f4e9b5657523bb37a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MainCameraPrefab: {fileID: 8096228818338544189, guid: aafb2f36cfda85044b4b753ef5515a13,
-    type: 3}
-  UiCanvasPrefab: {fileID: 7225852543368158398, guid: 346de805ce86cac47a4cbd7ad8df5a68,
-    type: 3}
-  StartingHealth: 3
-  StartingSilverKeys: 0
-  StartingGoldKeys: 0
-  StartingPower: 1
+  m_Events:
+    m_DamageRequested:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 5511520330804121984}
+          m_TargetAssemblyTypeName: Health, Assembly-CSharp
+          m_MethodName: OnDamageRequested
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    m_TookDamage:
+      m_PersistentCalls:
+        m_Calls: []
+    m_Died:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 7508853311565033528}
+          m_TargetAssemblyTypeName: BasicAttack, Assembly-CSharp
+          m_MethodName: OnDied
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 642814178074718499}
+          m_TargetAssemblyTypeName: TopDownMover, Assembly-CSharp
+          m_MethodName: OnDied
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  m_MaxHp: 48
+  m_MercyDuration: 1
 --- !u!114 &3940479755811753668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254,12 +295,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02150c67fc74672498bceaf5a011a92f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BulletPrefab: {fileID: 2328407042054765367, guid: ac035a89baa6b42459d4b7081c0c92b8,
+  m_BulletPrefab: {fileID: 4461145405902830748, guid: 08c9a79c7a8f1394488c00f4f1d31a3f,
     type: 3}
+  m_BulletPower: 16
   m_BulletSpeed: 8
   m_MaxBullets: 3
-  m_FireKeys: 200000007a000000
---- !u!114 &5511520330804121984
+--- !u!114 &6048878650217040083
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -268,34 +309,124 @@ MonoBehaviour:
   m_GameObject: {fileID: 1251368257008023425}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16e2e4cd3246b3f4e9b5657523bb37a1, type: 3}
+  m_Script: {fileID: 11500000, guid: 45678c58c2f66264587f04cfd07726d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &4052177169978583973
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8345363657868724670}
+  - component: {fileID: 2706890883181859262}
+  - component: {fileID: 6299019688288574434}
+  m_Layer: 0
+  m_Name: StaircaseCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8345363657868724670
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4052177169978583973}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1251368257008023434}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &2706890883181859262
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4052177169978583973}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.125
+--- !u!114 &6299019688288574434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4052177169978583973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41e529ba961823640a9d6fd6078126d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Events:
-    m_DamageRequested:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 5511520330804121984}
-          m_TargetAssemblyTypeName: Health, Assembly-CSharp
-          m_MethodName: OnDamageRequested
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    m_TookDamage:
+    m_CollisionEnter:
       m_PersistentCalls:
         m_Calls: []
-    m_Died:
+    m_CollisionStay:
+      m_PersistentCalls:
+        m_Calls: []
+    m_CollisionExit:
+      m_PersistentCalls:
+        m_Calls: []
+    m_TriggerEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    m_TriggerStay:
+      m_PersistentCalls:
+        m_Calls: []
+    m_TriggerExit:
+      m_PersistentCalls:
+        m_Calls: []
+    m_CollisionEnter2D:
+      m_PersistentCalls:
+        m_Calls: []
+    m_CollisionStay2D:
+      m_PersistentCalls:
+        m_Calls: []
+    m_CollisionExit2D:
+      m_PersistentCalls:
+        m_Calls: []
+    m_TriggerEnter2D:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 7508853311565033528}
-          m_TargetAssemblyTypeName: BasicAttack, Assembly-CSharp
-          m_MethodName: OnDied
+        - m_Target: {fileID: 6048878650217040083}
+          m_TargetAssemblyTypeName: StaircaseUser, Assembly-CSharp
+          m_MethodName: OnProxyTriggerEnter2D
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -305,5 +436,9 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  m_MaxHp: 48
-  m_MercyDuration: 1
+    m_TriggerStay2D:
+      m_PersistentCalls:
+        m_Calls: []
+    m_TriggerExit2D:
+      m_PersistentCalls:
+        m_Calls: []

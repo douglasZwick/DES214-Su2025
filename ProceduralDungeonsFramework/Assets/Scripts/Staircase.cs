@@ -3,14 +3,18 @@ using UnityEngine;
 
 public class Staircase : MonoBehaviour
 {
-  void Start()
+  /// <summary>
+  /// The transform to go to when this staircase is the destination. Defaults
+  /// to this object's transform.
+  /// </summary>
+  public Transform m_DestinationTransform;
+  [HideInInspector]
+  public Staircase m_Target;
+
+
+  void Awake()
   {
-
-  }
-
-
-  void Update()
-  {
-
+    if (m_DestinationTransform == null)
+      m_DestinationTransform = transform;
   }
 }

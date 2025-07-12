@@ -10,6 +10,8 @@ public class Room : MonoBehaviour
 [Serializable]
 public class RoomData
 {
+  // TODO: Since this is basically exactly the same set of stuff I want for
+  //   stair data, I should consider renaming this class
   [Serializable]
   public class DoorData
   {
@@ -63,6 +65,7 @@ public class RoomData
   }
 
   public DoorData m_Doors = new();
+  public DoorData m_Stairs = new();
   public Tags m_Tags = new();
 
   [HideInInspector]
