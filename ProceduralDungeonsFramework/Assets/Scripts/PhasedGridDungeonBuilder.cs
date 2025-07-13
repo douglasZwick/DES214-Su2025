@@ -302,13 +302,14 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
         }
       }
     }
-
+    
     return Carve(dest, destIndex);
   }
 
 
   RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex)
   {
+    Debug.Log("TUNNEL BUILT");
     var dest = ConnectAlongGoldenPath(from, destIndex);
     dest.m_Tags.m_Tunnel = true;
 
@@ -378,6 +379,20 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   void BuildRooms()
   {
+    // PROBLEM:
+    //   In this loop, we create the current room's frame. In the current
+    //   implementation, for staircase linkage, we also need to access the next
+    //   room's frame. But, of course, that frame doesn't exist yet, because we
+    //   haven't made it yet (it'll be next in the loop).
+    //
+    // SOLUTION 1:
+    //   First create the first two frames outside of a loop, and then loop
+    //   through the rest of the rooms, linking the "current" room to its
+    //   predecessor, and linking that predecessor to ITS predecessor.
+    // SOLUTION 2:
+    //   Same as solution 1, except we do the whole thing in a loop, including
+    //   the first two frames, and we just do null checks on the predecessors.
+
     foreach (var kvp in m_Grid)
     {
       var index = kvp.Key;
@@ -389,8 +404,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       var frame = Instantiate(m_FramePrefabs[0],
         roomPosition, Quaternion.identity);
 
-      frame.BlockSetupForDoorData(kvp.Value.m_Doors);
-      frame.StairSetupForRoomData(kvp.Value);
+      kvp.Value.m_Frame = frame;
+      frame.Setup(kvp.Value);
     }
   }
 

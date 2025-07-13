@@ -75,6 +75,8 @@ public class RoomData
   [HideInInspector]
   public RoomData m_Prev;
   [HideInInspector]
+  public Frame m_Frame;
+  [HideInInspector]
   public ArcPhase m_Phase = ArcPhase.Setup;
 
   public bool IsStart

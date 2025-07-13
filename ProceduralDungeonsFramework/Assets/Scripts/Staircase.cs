@@ -17,4 +17,11 @@ public class Staircase : MonoBehaviour
     if (m_DestinationTransform == null)
       m_DestinationTransform = transform;
   }
+
+
+  static public void Connect(Staircase a, Staircase b)
+  {
+    a.m_Target = b;
+    b.m_Target = a;
+  }
 }
