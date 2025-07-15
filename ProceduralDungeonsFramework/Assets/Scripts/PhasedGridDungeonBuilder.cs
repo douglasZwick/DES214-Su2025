@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Enum = System.Enum;
 using System.Text;
-using System;
+// using System;
 using Random = UnityEngine.Random;
 
 
@@ -36,10 +36,12 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
 
-  private Dictionary<Vector2Int, RoomData> m_Grid;
-  private Vector2 m_RoomSize;
-  private List<RoomData> m_GoldenPath = new();
-  private ArcPhase CurrentPhase
+  Dictionary<Vector2Int, RoomData> m_Grid;
+  Vector2 m_RoomSize;
+  List<RoomData> m_GoldenPath = new();
+  List<TunnelData> m_Tunnels = new();
+
+  ArcPhase CurrentPhase
   {
     get
     {
@@ -61,8 +63,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       return ArcPhase.Resolution;
     }
   }
+  
 
-  private int ComputeTargetPathLength()
+  int ComputeTargetPathLength()
   {
     return m_RoomCounts.Values.Sum();
   }
@@ -211,12 +214,15 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     Log($"      Found vacant spot at {tunnelDestinationIndex}",
       DebuggingLevel.Verbose);
 
+    var tunnelDirection = ConvertOffsetToDirection(firstPickedOffset);
+
     // At this point, we've found an index that will work
-    return ConnectByTunnel(currSlot, tunnelDestinationIndex);
+    return ConnectByTunnel(currSlot, tunnelDestinationIndex, tunnelDirection);
   }
 
 
-  RoomData ConnectAlongGoldenPath(RoomData from, Vector2Int destIndex)
+  RoomData ConnectAlongGoldenPath(RoomData from, Vector2Int destIndex,
+    bool isTunnel = false)
   {
     var fromIndex = from.m_Index;
 
@@ -227,6 +233,32 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     dest.m_Prev = from;
     from.m_Next = dest;
 
+    var indexDiff = destIndex - fromIndex;
+    var direction = ConvertOffsetToDirection(indexDiff);
+    
+    var (destConnector, fromConnector) = isTunnel ?
+      (dest.m_Stairs, from.m_Stairs) : (dest.m_Doors, from.m_Doors);
+
+    switch (direction)
+    {
+      case Direction.N:
+        destConnector.m_S = true;
+        fromConnector.m_N = true;
+        break;
+      case Direction.S:
+        destConnector.m_N = true;
+        fromConnector.m_S = true;
+        break;
+      case Direction.E:
+        destConnector.m_W = true;
+        fromConnector.m_E = true;
+        break;
+      default:  // W
+        destConnector.m_E = true;
+        fromConnector.m_W = true;
+        break;
+    }
+
     // We need to tell the RoomData where its doors should and shouldn't be. We
     //   determine this by comparing indices:
     //   - If the indices differ by more than 1 on either axis, then this is a
@@ -236,81 +268,82 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     //   Once we know which doorways we need, we set them: one on this RoomData
     //     and the other on the other
 
-    var indexDiff = destIndex - fromIndex;
-    var isTunnel = Math.Abs(indexDiff.x) > 1 || Math.Abs(indexDiff.y) > 1;
-
-    // N-S
-    if (indexDiff.x == 0)
-    {
-      // If the Y diff is greater than 0, then destIndex is N of fromIndex.
-      //   This means dest has a S door or stair and from has an N.
-      if (indexDiff.y > 0)
-      {
-        if (isTunnel)
-        {
-          dest.m_Stairs.m_S = true;
-          from.m_Stairs.m_N = true;
-        }
-        else
-        {
-          dest.m_Doors.m_S = true;
-          from.m_Doors.m_N = true;
-        }
-      }
-      else  // Otherwise, reverse that
-      {
-        if (isTunnel)
-        {
-          dest.m_Stairs.m_N = true;
-          from.m_Stairs.m_S = true;
-        }
-        else
-        {
-          dest.m_Doors.m_N = true;
-          from.m_Doors.m_S = true;
-        }
-      }
-    }
-    else  // E-W
-    {
-      // If the X diff is greater than 0, then destIndex is E of fromIndex.
-      //   This means dest has a W door or stair and from has an E.
-      if (indexDiff.x > 0)
-      {
-        if (isTunnel)
-        {
-          dest.m_Stairs.m_W = true;
-          from.m_Stairs.m_E = true;
-        }
-        else
-        {
-          dest.m_Doors.m_W = true;
-          from.m_Doors.m_E = true;
-        }
-      }
-      else  // Otherwise, reverse that
-      {
-        if (isTunnel)
-        {
-          dest.m_Stairs.m_E = true;
-          from.m_Stairs.m_W = true;
-        }
-        else
-        {
-          dest.m_Doors.m_E = true;
-          from.m_Doors.m_W = true;
-        }
-      }
-    }
+    // // N-S
+    // if (indexDiff.x == 0)
+    // {
+    //   // If the Y diff is greater than 0, then destIndex is N of fromIndex.
+    //   //   This means dest has a S door or stair and from has an N.
+    //   if (indexDiff.y > 0)
+    //   {
+    //     if (isTunnel)
+    //     {
+    //       dest.m_Stairs.m_S = true;
+    //       from.m_Stairs.m_N = true;
+    //     }
+    //     else
+    //     {
+    //       dest.m_Doors.m_S = true;
+    //       from.m_Doors.m_N = true;
+    //     }
+    //   }
+    //   else  // Otherwise, reverse that
+    //   {
+    //     if (isTunnel)
+    //     {
+    //       dest.m_Stairs.m_N = true;
+    //       from.m_Stairs.m_S = true;
+    //     }
+    //     else
+    //     {
+    //       dest.m_Doors.m_N = true;
+    //       from.m_Doors.m_S = true;
+    //     }
+    //   }
+    // }
+    // else  // E-W
+    // {
+    //   // If the X diff is greater than 0, then destIndex is E of fromIndex.
+    //   //   This means dest has a W door or stair and from has an E.
+    //   if (indexDiff.x > 0)
+    //   {
+    //     if (isTunnel)
+    //     {
+    //       dest.m_Stairs.m_W = true;
+    //       from.m_Stairs.m_E = true;
+    //     }
+    //     else
+    //     {
+    //       dest.m_Doors.m_W = true;
+    //       from.m_Doors.m_E = true;
+    //     }
+    //   }
+    //   else  // Otherwise, reverse that
+    //   {
+    //     if (isTunnel)
+    //     {
+    //       dest.m_Stairs.m_E = true;
+    //       from.m_Stairs.m_W = true;
+    //     }
+    //     else
+    //     {
+    //       dest.m_Doors.m_E = true;
+    //       from.m_Doors.m_W = true;
+    //     }
+    //   }
+    // }
     
     return Carve(dest, destIndex);
   }
 
 
-  RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex)
+  RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex,
+    Direction direction)
   {
     Debug.Log("TUNNEL BUILT");
-    var dest = ConnectAlongGoldenPath(from, destIndex);
+    m_Tunnels.Add(new TunnelData(from, destIndex, direction));
+
+    var dest = ConnectAlongGoldenPath(from, destIndex, true);
+    from.m_Tags.m_Tunnel = true;
     dest.m_Tags.m_Tunnel = true;
 
     return dest;
@@ -396,6 +429,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     foreach (var kvp in m_Grid)
     {
       var index = kvp.Key;
+      var roomData = kvp.Value;
       var roomPosition2d = index * m_RoomSize;
       var roomPosition = new Vector3(roomPosition2d.x, roomPosition2d.y);
 
@@ -404,8 +438,25 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       var frame = Instantiate(m_FramePrefabs[0],
         roomPosition, Quaternion.identity);
 
-      kvp.Value.m_Frame = frame;
-      frame.Setup(kvp.Value);
+      roomData.m_Frame = frame;
+      frame.Setup(roomData);
+
+      if (roomData.m_Tags.m_Tunnel)
+        frame.StairSetup();
+    }
+
+    foreach (var tunnel in m_Tunnels)
+    {
+      // TODO: Make it so that the function that connects rooms via tunnel also
+      //   passes directions into the new Tunnel object it adds to m_Tunnels.
+      //   Then, make this loop connect the tunnels based on that direction
+      var dir = tunnel.m_Direction;
+      var opp = OppositeDirection(dir);
+      var fromFrame = m_Grid[tunnel.m_FromIndex].m_Frame;
+      var toFrame = m_Grid[tunnel.m_ToIndex].m_Frame;
+      var fromStairs = fromFrame.GetStaircaseFromDirection(dir);
+      var toStairs = toFrame.GetStaircaseFromDirection(opp);
+      Staircase.Connect(fromStairs, toStairs);
     }
   }
 
@@ -479,7 +530,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     for (var y = 0; y < gridH; ++y)
     {
       var row = new string[gridW];
-      Array.Fill(row, ". ");
+      System.Array.Fill(row, ". ");
       gridAsArray[y] = row;
     }
 
@@ -491,13 +542,13 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       gridAsArray[y][x] = gridString;
     }
 
-    var outputSb = new StringBuilder();
+    var outSb = new StringBuilder();
     foreach (var row in gridAsArray)
-      outputSb.AppendLine(string.Join("", row));
+      outSb.AppendLine(string.Join("", row));
 
-    var outputStr = $"Grid W: {gridW}, H: {gridH}" + Environment.NewLine +
-      outputSb.ToString();
-    Debug.Log(outputStr);
+    var outStr = $"Grid W: {gridW}, H: {gridH}" + System.Environment.NewLine +
+      outSb.ToString();
+    Debug.Log(outStr);
   }
 
 
@@ -563,4 +614,47 @@ public enum ArcPhase
   Development3,
   Turn,
   Resolution,
+}
+
+
+[System.Serializable]
+public class TunnelData
+{
+  public Vector2Int m_FromIndex;
+  public Vector2Int m_ToIndex;
+  public Direction m_Direction;
+
+  public TunnelData() { }
+
+  public TunnelData(Vector2Int fromIndex, Vector2Int toIndex,
+    Direction direction)
+  {
+    m_FromIndex = fromIndex;
+    m_ToIndex = toIndex;
+    m_Direction = direction;
+  }
+
+  public TunnelData(Vector2Int fromIndex, RoomData toRoom,
+    Direction direction)
+  {
+    m_FromIndex = fromIndex;
+    m_ToIndex = toRoom.m_Index;
+    m_Direction = direction;
+  }
+
+  public TunnelData(RoomData fromRoom, Vector2Int toIndex,
+    Direction direction)
+  {
+    m_FromIndex = fromRoom.m_Index;
+    m_ToIndex = toIndex;
+    m_Direction = direction;
+  }
+
+  public TunnelData(RoomData fromRoom, RoomData toRoom,
+    Direction direction)
+  {
+    m_FromIndex = fromRoom.m_Index;
+    m_ToIndex = toRoom.m_Index;
+    m_Direction = direction;
+  }
 }

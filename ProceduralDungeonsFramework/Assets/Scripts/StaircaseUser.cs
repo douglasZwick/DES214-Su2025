@@ -4,7 +4,7 @@ using UnityEngine;
 public class StaircaseUser : MonoBehaviour
 {
   Transform m_Tx;
-  bool m_Active = true;
+  Staircase m_CurrentTarget;
 
 
   void Awake()
@@ -15,11 +15,10 @@ public class StaircaseUser : MonoBehaviour
 
   public void OnProxyTriggerEnter2D(ProxyCollisionEventData proxyCED)
   {
-    if (!m_Active) return;
-
     var stairs = proxyCED.m_Collider2D.gameObject.GetComponent<Staircase>();
 
     if (stairs == null) return;
+    if (stairs == m_CurrentTarget) return;
 
     UseStairs(stairs);
   }
@@ -27,16 +26,17 @@ public class StaircaseUser : MonoBehaviour
 
   void UseStairs(Staircase stairs)
   {
-    m_Active = false;
-
-    m_Tx.position = stairs.m_DestinationTransform.position;
-
-    Invoke("Reactivate", 0);
+    m_CurrentTarget = stairs.m_Target;
+    m_Tx.position = m_CurrentTarget.m_DestinationTransform.position;
   }
 
 
-  void Reactivate()
+  public void OnProxyTriggerExit2D(ProxyCollisionEventData proxyCED)
   {
-    m_Active = true;
+    var stairs = proxyCED.m_Collider2D.gameObject.GetComponent<Staircase>();
+
+    if (stairs != m_CurrentTarget) return;
+
+    m_CurrentTarget = null;
   }
 }

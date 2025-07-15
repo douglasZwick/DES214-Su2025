@@ -57,11 +57,12 @@ public class BasicAttack : MonoBehaviour
   void Attack()
   {
     var bullet = Instantiate(m_BulletPrefab, m_Tx.position, m_Tx.rotation);
-    bullet.GetComponent<Rigidbody2D>().linearVelocity = m_Tx.up * m_BulletSpeed;
-    var damageOnCollide = bullet.GetComponent<DamageOnCollide>();
-    damageOnCollide.Setup(m_BulletPower, m_Character);
     var destroyOnCollide = bullet.GetComponent<DestroyOnCollide>();
     destroyOnCollide.IgnoreTeam(m_Character);
+    var damageOnCollide = bullet.GetComponent<DamageOnCollide>();
+    damageOnCollide.Setup(m_BulletPower, m_Character);
+
+    bullet.GetComponent<Rigidbody2D>().linearVelocity = m_Tx.up * m_BulletSpeed;
 
     m_Bullets.Add(bullet);
   }

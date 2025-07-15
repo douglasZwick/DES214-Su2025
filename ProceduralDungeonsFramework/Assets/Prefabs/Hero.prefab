@@ -282,7 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 102bd7424806a58429f493d63e51605e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Speed: 5
+  m_Speed: 12
 --- !u!114 &7508853311565033528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,7 +323,7 @@ GameObject:
   - component: {fileID: 8345363657868724670}
   - component: {fileID: 2706890883181859262}
   - component: {fileID: 6299019688288574434}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: StaircaseCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

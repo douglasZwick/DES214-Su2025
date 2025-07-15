@@ -23,7 +23,6 @@ public class Frame : MonoBehaviour
     m_RoomData = roomData;
 
     BlockSetup();
-    StairSetup();
   }
 
 
@@ -36,8 +35,10 @@ public class Frame : MonoBehaviour
   }
 
 
-  void StairSetup()
+  public void StairSetup()
   {
+    Debug.Log($"Stair setup for {m_RoomData.m_Index}");
+
     var stairs = m_RoomData.m_Stairs;
 
     if (!(stairs.m_N || stairs.m_S || stairs.m_E || stairs.m_W)) return;
@@ -47,13 +48,13 @@ public class Frame : MonoBehaviour
     m_StaircaseE.gameObject.SetActive(stairs.m_E);
     m_StaircaseW.gameObject.SetActive(stairs.m_W);
 
-    var next = m_RoomData.m_Next;
-    if (next != null)
-      ConnectStairs(next);
+    // var next = m_RoomData.m_Next;
+    // if (next != null)
+    //   ConnectStairs(next);
 
-    var prev = m_RoomData.m_Prev;
-    if (prev != null)
-      ConnectStairs(prev);
+    // var prev = m_RoomData.m_Prev;
+    // if (prev != null)
+    //   ConnectStairs(prev);
   }
 
 
@@ -96,5 +97,17 @@ public class Frame : MonoBehaviour
         Staircase.Connect(a, b);
       }
     }
+  }
+
+
+  public Staircase GetStaircaseFromDirection(Direction direction)
+  {
+    return direction switch
+    {
+      Direction.N => m_StaircaseN,
+      Direction.S => m_StaircaseS,
+      Direction.E => m_StaircaseE,
+      _           => m_StaircaseW,
+    };
   }
 }
