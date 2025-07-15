@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Enum = System.Enum;
 using System.Text;
-// using System;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 
@@ -35,11 +35,13 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   };
 
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
+  public bool m_EnsureTunnel = false;
 
   Dictionary<Vector2Int, RoomData> m_Grid;
   Vector2 m_RoomSize;
   List<RoomData> m_GoldenPath = new();
   List<TunnelData> m_Tunnels = new();
+  bool m_ContainsTunnel = false;
 
   ArcPhase CurrentPhase
   {
@@ -89,6 +91,9 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     PrintGrid();
 
     BuildRooms();
+
+    if (m_EnsureTunnel && !m_ContainsTunnel)
+      SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
   }
 
 
@@ -259,79 +264,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
         break;
     }
 
-    // We need to tell the RoomData where its doors should and shouldn't be. We
-    //   determine this by comparing indices:
-    //   - If the indices differ by more than 1 on either axis, then this is a
-    //     tunnel connection, and we should set stairs instead of doors
-    //   - If they're equal on the X axis, then this is a N-S connection
-    //   - Otherwise this is an E-W connection
-    //   Once we know which doorways we need, we set them: one on this RoomData
-    //     and the other on the other
-
-    // // N-S
-    // if (indexDiff.x == 0)
-    // {
-    //   // If the Y diff is greater than 0, then destIndex is N of fromIndex.
-    //   //   This means dest has a S door or stair and from has an N.
-    //   if (indexDiff.y > 0)
-    //   {
-    //     if (isTunnel)
-    //     {
-    //       dest.m_Stairs.m_S = true;
-    //       from.m_Stairs.m_N = true;
-    //     }
-    //     else
-    //     {
-    //       dest.m_Doors.m_S = true;
-    //       from.m_Doors.m_N = true;
-    //     }
-    //   }
-    //   else  // Otherwise, reverse that
-    //   {
-    //     if (isTunnel)
-    //     {
-    //       dest.m_Stairs.m_N = true;
-    //       from.m_Stairs.m_S = true;
-    //     }
-    //     else
-    //     {
-    //       dest.m_Doors.m_N = true;
-    //       from.m_Doors.m_S = true;
-    //     }
-    //   }
-    // }
-    // else  // E-W
-    // {
-    //   // If the X diff is greater than 0, then destIndex is E of fromIndex.
-    //   //   This means dest has a W door or stair and from has an E.
-    //   if (indexDiff.x > 0)
-    //   {
-    //     if (isTunnel)
-    //     {
-    //       dest.m_Stairs.m_W = true;
-    //       from.m_Stairs.m_E = true;
-    //     }
-    //     else
-    //     {
-    //       dest.m_Doors.m_W = true;
-    //       from.m_Doors.m_E = true;
-    //     }
-    //   }
-    //   else  // Otherwise, reverse that
-    //   {
-    //     if (isTunnel)
-    //     {
-    //       dest.m_Stairs.m_E = true;
-    //       from.m_Stairs.m_W = true;
-    //     }
-    //     else
-    //     {
-    //       dest.m_Doors.m_E = true;
-    //       from.m_Doors.m_W = true;
-    //     }
-    //   }
-    // }
-    
     return Carve(dest, destIndex);
   }
 
@@ -339,7 +271,10 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex,
     Direction direction)
   {
-    Debug.Log("TUNNEL BUILT");
+    m_ContainsTunnel = true;
+    var roomNum = m_GoldenPath.FindIndex(room => room == from);
+    Log($"TUNNEL BUILT connecting rooms {roomNum} and {roomNum + 1}",
+      DebuggingLevel.Detail);
     m_Tunnels.Add(new TunnelData(from, destIndex, direction));
 
     var dest = ConnectAlongGoldenPath(from, destIndex, true);

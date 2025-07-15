@@ -16,6 +16,7 @@ public class StaircaseUser : MonoBehaviour
   public void OnProxyTriggerEnter2D(ProxyCollisionEventData proxyCED)
   {
     var stairs = proxyCED.m_Collider2D.gameObject.GetComponent<Staircase>();
+    Debug.Log($"Enter {stairs} | Is curr: {stairs == m_CurrentTarget}");
 
     if (stairs == null) return;
     if (stairs == m_CurrentTarget) return;
@@ -26,6 +27,7 @@ public class StaircaseUser : MonoBehaviour
 
   void UseStairs(Staircase stairs)
   {
+    Debug.Log($"Using stairs {stairs}");
     m_CurrentTarget = stairs.m_Target;
     m_Tx.position = m_CurrentTarget.m_DestinationTransform.position;
   }
@@ -34,6 +36,7 @@ public class StaircaseUser : MonoBehaviour
   public void OnProxyTriggerExit2D(ProxyCollisionEventData proxyCED)
   {
     var stairs = proxyCED.m_Collider2D.gameObject.GetComponent<Staircase>();
+    Debug.Log($"Exit {stairs} | Is curr: {stairs == m_CurrentTarget}");
 
     if (stairs != m_CurrentTarget) return;
 

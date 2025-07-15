@@ -381,6 +381,7 @@ MonoBehaviour:
   - {fileID: 2233319693076713689, guid: 5a889bfcb5b506a428a97fcccf1cf495, type: 3}
   m_InteriorPrefabs: []
   m_DebuggingLevel: 0
+  m_EnsureTunnel: 1
 --- !u!114 &1518111464
 MonoBehaviour:
   m_ObjectHideFlags: 0
