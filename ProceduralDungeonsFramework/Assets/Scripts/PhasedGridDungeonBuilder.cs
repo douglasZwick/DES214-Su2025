@@ -347,20 +347,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
   void BuildRooms()
   {
-    // PROBLEM:
-    //   In this loop, we create the current room's frame. In the current
-    //   implementation, for staircase linkage, we also need to access the next
-    //   room's frame. But, of course, that frame doesn't exist yet, because we
-    //   haven't made it yet (it'll be next in the loop).
-    //
-    // SOLUTION 1:
-    //   First create the first two frames outside of a loop, and then loop
-    //   through the rest of the rooms, linking the "current" room to its
-    //   predecessor, and linking that predecessor to ITS predecessor.
-    // SOLUTION 2:
-    //   Same as solution 1, except we do the whole thing in a loop, including
-    //   the first two frames, and we just do null checks on the predecessors.
-
     foreach (var kvp in m_Grid)
     {
       var index = kvp.Key;
@@ -382,9 +368,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
     foreach (var tunnel in m_Tunnels)
     {
-      // TODO: Make it so that the function that connects rooms via tunnel also
-      //   passes directions into the new Tunnel object it adds to m_Tunnels.
-      //   Then, make this loop connect the tunnels based on that direction
       var dir = tunnel.m_Direction;
       var opp = OppositeDirection(dir);
       var fromFrame = m_Grid[tunnel.m_FromIndex].m_Frame;
