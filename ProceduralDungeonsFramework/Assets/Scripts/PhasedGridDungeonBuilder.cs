@@ -37,6 +37,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
   public bool m_EnsureTunnel = false;
 
+  Transform m_DungeonTx;
   Dictionary<Vector2Int, RoomData> m_Grid;
   Vector2 m_RoomSize;
   List<RoomData> m_GoldenPath = new();
@@ -76,6 +77,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   void Awake()
   {
     var dungeon = GetComponent<Dungeon>();
+    m_DungeonTx = dungeon.m_DungeonRoot.transform;
     m_Grid = dungeon.m_Grid;
     m_RoomSize = dungeon.m_RoomSize;
 
@@ -364,6 +366,8 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
       if (roomData.m_Tags.m_Tunnel)
         frame.StairSetup();
+
+      frame.transform.SetParent(m_DungeonTx);
     }
 
     foreach (var tunnel in m_Tunnels)
