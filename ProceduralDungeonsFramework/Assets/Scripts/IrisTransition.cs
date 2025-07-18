@@ -1,8 +1,12 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 
 public class IrisTransition : MonoBehaviour
 {
+  static public IrisEvent s_OpenRequest = new();
+  static public IrisEvent s_CloseRequest = new();
+
   public SpriteRenderer m_CardRenderer;
   public Transform m_IrisTx;
   public Camera m_Camera;
@@ -10,6 +14,7 @@ public class IrisTransition : MonoBehaviour
 
   bool m_Running = false;
   bool m_Opening = false;
+  bool m_IsOpen = true;
   float m_Timer = 0;
   Vector3 m_StartScale;
   Vector3 m_EndScale;
@@ -35,6 +40,13 @@ public class IrisTransition : MonoBehaviour
   }
 
 
+  void Awake()
+  {
+    s_OpenRequest.AddListener(OnOpenRequest);
+    s_CloseRequest.AddListener(OnCloseRequest);
+  }
+
+
   void Update()
   {
     if (m_Running)
@@ -42,15 +54,15 @@ public class IrisTransition : MonoBehaviour
   }
 
 
-  void CloseToWorldPoint(Vector3 worldPoint)
+  void OnOpenRequest(IrisEventData irisED)
   {
-    m_Opening = false;
+    OpenFromWorldPoint(irisED.m_WorldPoint);
+  }
 
-    m_IrisTx.position = worldPoint;
-    var fromScale = ComputeOpenScaleForWorldPoint(worldPoint);
-    var toScale = new Vector3(0, 0, 1);
 
-    Begin(fromScale, toScale);
+  void OnCloseRequest(IrisEventData irisED)
+  {
+    CloseToWorldPoint(irisED.m_WorldPoint);
   }
 
 
@@ -61,6 +73,18 @@ public class IrisTransition : MonoBehaviour
     m_IrisTx.position = worldPoint;
     var fromScale = new Vector3(0, 0, 1);
     var toScale = ComputeOpenScaleForWorldPoint(worldPoint);
+
+    Begin(fromScale, toScale);
+  }
+
+
+  void CloseToWorldPoint(Vector3 worldPoint)
+  {
+    m_Opening = false;
+
+    m_IrisTx.position = worldPoint;
+    var fromScale = ComputeOpenScaleForWorldPoint(worldPoint);
+    var toScale = new Vector3(0, 0, 1);
 
     Begin(fromScale, toScale);
   }
@@ -99,10 +123,12 @@ public class IrisTransition : MonoBehaviour
     if (m_Opening)
     {
       m_CardRenderer.enabled = false;
+      m_IsOpen = true;
     }
     else
     {
       m_IrisTx.gameObject.SetActive(false);
+      m_IsOpen = false;
     }
   }
 
@@ -142,4 +168,14 @@ public class IrisTransition : MonoBehaviour
 
     return lb;
   }
+}
+
+
+[System.Serializable]
+public class IrisEvent : UnityEvent<IrisEventData> { }
+
+public class IrisEventData
+{
+  public Vector3 m_WorldPoint;
+  // public Transform m_TargetObject;
 }

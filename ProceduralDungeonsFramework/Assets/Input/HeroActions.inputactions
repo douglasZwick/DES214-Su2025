@@ -68,6 +68,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Iris",
+                    "type": "Button",
+                    "id": "9c76729d-5212-431c-b7be-7939cac2a811",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -343,6 +352,17 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "Item 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00afdc32-22e2-49a0-a103-7a76370e29e3",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Iris",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
