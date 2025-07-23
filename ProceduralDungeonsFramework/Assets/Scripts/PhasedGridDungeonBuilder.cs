@@ -41,7 +41,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   Dictionary<Vector2Int, RoomData> m_Grid;
   Vector2 m_RoomSize;
   List<RoomData> m_GoldenPath = new();
-  List<TunnelData> m_Tunnels = new();
+  List<TunnelCarvingData> m_Tunnels = new();
   bool m_ContainsTunnel = false;
 
   ArcPhase CurrentPhase
@@ -243,8 +243,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     var indexDiff = destIndex - fromIndex;
     var direction = ConvertOffsetToDirection(indexDiff);
     
-    var (destConnector, fromConnector) = isTunnel ?
-      (dest.m_Stairs, from.m_Stairs) : (dest.m_Doors, from.m_Doors);
+    var (destConnector, fromConnector) = (dest.m_Doors, from.m_Doors);
 
     switch (direction)
     {
@@ -277,11 +276,11 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
     var roomNum = m_GoldenPath.FindIndex(room => room == from);
     Log($"TUNNEL BUILT connecting rooms {roomNum} and {roomNum + 1}",
       DebuggingLevel.Detail);
-    m_Tunnels.Add(new TunnelData(from, destIndex, direction));
+    m_Tunnels.Add(new TunnelCarvingData(from, destIndex, direction));
 
     var dest = ConnectAlongGoldenPath(from, destIndex, true);
-    from.m_Tags.m_Tunnel = true;
-    dest.m_Tags.m_Tunnel = true;
+    from.m_TunnelConnections.Add(dest);
+    dest.m_TunnelConnections.Add(from);
 
     return dest;
   }
@@ -363,9 +362,6 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
       roomData.m_Frame = frame;
       frame.Setup(roomData);
-
-      if (roomData.m_Tags.m_Tunnel)
-        frame.StairSetup();
 
       frame.transform.SetParent(m_DungeonTx);
     }
@@ -540,15 +536,15 @@ public enum ArcPhase
 
 
 [System.Serializable]
-public class TunnelData
+public class TunnelCarvingData
 {
   public Vector2Int m_FromIndex;
   public Vector2Int m_ToIndex;
   public Direction m_Direction;
 
-  public TunnelData() { }
+  public TunnelCarvingData() { }
 
-  public TunnelData(Vector2Int fromIndex, Vector2Int toIndex,
+  public TunnelCarvingData(Vector2Int fromIndex, Vector2Int toIndex,
     Direction direction)
   {
     m_FromIndex = fromIndex;
@@ -556,7 +552,7 @@ public class TunnelData
     m_Direction = direction;
   }
 
-  public TunnelData(Vector2Int fromIndex, RoomData toRoom,
+  public TunnelCarvingData(Vector2Int fromIndex, RoomData toRoom,
     Direction direction)
   {
     m_FromIndex = fromIndex;
@@ -564,7 +560,7 @@ public class TunnelData
     m_Direction = direction;
   }
 
-  public TunnelData(RoomData fromRoom, Vector2Int toIndex,
+  public TunnelCarvingData(RoomData fromRoom, Vector2Int toIndex,
     Direction direction)
   {
     m_FromIndex = fromRoom.m_Index;
@@ -572,7 +568,7 @@ public class TunnelData
     m_Direction = direction;
   }
 
-  public TunnelData(RoomData fromRoom, RoomData toRoom,
+  public TunnelCarvingData(RoomData fromRoom, RoomData toRoom,
     Direction direction)
   {
     m_FromIndex = fromRoom.m_Index;

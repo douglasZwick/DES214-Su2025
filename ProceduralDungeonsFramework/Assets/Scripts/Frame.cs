@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Frame : MonoBehaviour
@@ -14,6 +16,8 @@ public class Frame : MonoBehaviour
   public Staircase m_StaircaseE;
   public Staircase m_StaircaseW;
 
+  public List<Staircase> m_Stairs = new();
+
   [HideInInspector]
   public RoomData m_RoomData;
 
@@ -23,6 +27,7 @@ public class Frame : MonoBehaviour
     m_RoomData = roomData;
 
     BlockSetup();
+    StairSetup();
   }
 
 
@@ -35,67 +40,18 @@ public class Frame : MonoBehaviour
   }
 
 
-  public void StairSetup()
+  void StairSetup()
   {
-    Debug.Log($"Stair setup for {m_RoomData.m_Index}");
+    var tunnelConnections = m_RoomData.m_TunnelConnections;
+    var staircaseExceptions = new List<Staircase>();
 
-    var stairs = m_RoomData.m_Stairs;
-
-    if (!(stairs.m_N || stairs.m_S || stairs.m_E || stairs.m_W)) return;
-
-    m_StaircaseN.gameObject.SetActive(stairs.m_N);
-    m_StaircaseS.gameObject.SetActive(stairs.m_S);
-    m_StaircaseE.gameObject.SetActive(stairs.m_E);
-    m_StaircaseW.gameObject.SetActive(stairs.m_W);
-
-    // var next = m_RoomData.m_Next;
-    // if (next != null)
-    //   ConnectStairs(next);
-
-    // var prev = m_RoomData.m_Prev;
-    // if (prev != null)
-    //   ConnectStairs(prev);
-  }
-
-
-  void ConnectStairs(RoomData dest)
-  {
-    var currIndex = m_RoomData.m_Index;
-    var destIndex = dest.m_Index;
-    var indexDiff = destIndex - currIndex;
-
-    // N-S
-    if (indexDiff.x == 0)
+    for (var i = 0; i < tunnelConnections.Count; ++i)
     {
-      // Going north -- N on this, S on next
-      if (indexDiff.y > 1)
-      {
-        var a = m_StaircaseN;
-        var b = dest.m_Frame.m_StaircaseS;
-        Staircase.Connect(a, b);
-      }
-      else if (indexDiff.x < -1)
-      {
-        var a = m_StaircaseS;
-        var b = dest.m_Frame.m_StaircaseN;
-        Staircase.Connect(a, b);
-      }
-    }
-    else  // E-W
-    {
-      // Going east -- E on this, W on next
-      if (indexDiff.x > 1)
-      {
-        var a = m_StaircaseE;
-        var b = dest.m_Frame.m_StaircaseW;
-        Staircase.Connect(a, b);
-      }
-      else if (indexDiff.x < -1)
-      {
-        var a = m_StaircaseW;
-        var b = dest.m_Frame.m_StaircaseE;
-        Staircase.Connect(a, b);
-      }
+      var otherRoom = tunnelConnections[i];
+      var staircase = SelectStaircase(staircaseExceptions);
+      staircaseExceptions.Add(staircase);
+
+      // TODO: Pick it up here I guess
     }
   }
 
@@ -107,7 +63,16 @@ public class Frame : MonoBehaviour
       Direction.N => m_StaircaseN,
       Direction.S => m_StaircaseS,
       Direction.E => m_StaircaseE,
-      _           => m_StaircaseW,
+      _ => m_StaircaseW,
     };
+  }
+
+
+  Staircase SelectStaircase(List<Staircase> exceptions)
+  {
+    var candidates = m_Stairs.Except(exceptions).ToList();
+    var index = Random.Range(0, candidates.Count);
+
+    return candidates[index];
   }
 }

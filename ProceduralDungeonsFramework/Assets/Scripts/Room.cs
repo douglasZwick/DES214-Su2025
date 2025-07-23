@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class Room : MonoBehaviour
 {
@@ -61,11 +62,9 @@ public class RoomData
     public bool m_Dev3 = false;
     public bool m_Turn = false;
     public bool m_Resolution = false;
-    public bool m_Tunnel = false;
   }
 
   public DoorData m_Doors = new();
-  public DoorData m_Stairs = new();
   public Tags m_Tags = new();
 
   [HideInInspector]
@@ -74,6 +73,8 @@ public class RoomData
   public RoomData m_Next;
   [HideInInspector]
   public RoomData m_Prev;
+  [HideInInspector]
+  public List<RoomData> m_TunnelConnections = new();
   [HideInInspector]
   public Frame m_Frame;
   [HideInInspector]

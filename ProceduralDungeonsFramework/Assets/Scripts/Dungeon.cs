@@ -13,6 +13,9 @@ public class Dungeon : MonoBehaviour
   // public Transform m_ItemRoom;
   public Dictionary<Vector2Int, RoomData> m_Grid = new();
   public Vector2 m_RoomSize = new(16, 11);
+  public GameObject m_Hero;
+
+  static public List<Tunnel> s_Tunnels = new(); 
 
 
   void Start()
@@ -20,4 +23,19 @@ public class Dungeon : MonoBehaviour
     e_BuildRequest?.Invoke();
     e_BuildComplete?.Invoke();
   }
+
+
+
+}
+
+
+public class Tunnel
+{
+  public RoomData m_RoomA;
+  public RoomData m_RoomB;
+  public int m_StaircaseIndexA;
+  public int m_StaircaseIndexB;
+
+  public Vector2Int IndexA { get => m_RoomA.m_Index; }
+  public Vector2Int IndexB { get => m_RoomB.m_Index; }
 }
