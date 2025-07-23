@@ -28,6 +28,21 @@ public class BasicAttack : MonoBehaviour
 
     var playerInput = GetComponent<PlayerInput>();
     m_Attack = playerInput.actions.FindAction("Attack");
+
+    InputHold.e_HoldStarted.AddListener(OnHoldStarted);
+    InputHold.e_HoldReleased.AddListener(OnHoldReleased);
+  }
+
+
+  void OnHoldStarted(HoldEventData holdED)
+  {
+    m_Attack.Disable();
+  }
+
+
+  void OnHoldReleased(HoldEventData holdED)
+  {
+    m_Attack.Enable();
   }
 
 

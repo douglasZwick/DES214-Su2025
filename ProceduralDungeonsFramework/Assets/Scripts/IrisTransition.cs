@@ -87,6 +87,8 @@ public class IrisTransition : MonoBehaviour
     var toScale = new Vector3(0, 0, 1);
 
     Begin(fromScale, toScale);
+
+    InputHold.Add(this);
   }
 
 
@@ -120,10 +122,14 @@ public class IrisTransition : MonoBehaviour
 
   void End()
   {
+    m_Running = false;
+
     if (m_Opening)
     {
       m_CardRenderer.enabled = false;
       m_IsOpen = true;
+
+      InputHold.Release(this);
     }
     else
     {
