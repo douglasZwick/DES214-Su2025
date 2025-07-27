@@ -40,9 +40,11 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   Transform m_DungeonTx;
   Dictionary<Vector2Int, RoomData> m_Grid;
   Vector2 m_RoomSize;
+  [SerializeReference]
   List<RoomData> m_GoldenPath = new();
-  List<TunnelCarvingData> m_Tunnels = new();
-  bool m_ContainsTunnel = false;
+  List<TunnelCarvingData> m_TunnelCarvingData = new();
+
+  bool ContainsTunnel { get => m_TunnelCarvingData.Count > 0; }
 
   ArcPhase CurrentPhase
   {
@@ -85,7 +87,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
-  void OnBuildRequest()
+  void OnBuildRequest(DungeonEventData _)
   {
     CarveGoldenPath();
     // CarveExtras();
@@ -94,7 +96,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
 
     BuildRooms();
 
-    if (m_EnsureTunnel && !m_ContainsTunnel)
+    if (m_EnsureTunnel && !ContainsTunnel)
       SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
   }
 
@@ -272,11 +274,10 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   RoomData ConnectByTunnel(RoomData from, Vector2Int destIndex,
     Direction direction)
   {
-    m_ContainsTunnel = true;
     var roomNum = m_GoldenPath.FindIndex(room => room == from);
     Log($"TUNNEL BUILT connecting rooms {roomNum} and {roomNum + 1}",
       DebuggingLevel.Detail);
-    m_Tunnels.Add(new TunnelCarvingData(from, destIndex, direction));
+    m_TunnelCarvingData.Add(new TunnelCarvingData(from, destIndex, direction));
 
     var dest = ConnectAlongGoldenPath(from, destIndex, true);
     from.m_TunnelConnections.Add(dest);
@@ -358,23 +359,20 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       // For now we're just using the one and only frame prefab, but we'll
       //   replace this later
       var frame = Instantiate(m_FramePrefabs[0],
-        roomPosition, Quaternion.identity);
+        roomPosition, Quaternion.identity, m_DungeonTx);
 
       roomData.m_Frame = frame;
       frame.Setup(roomData);
-
-      frame.transform.SetParent(m_DungeonTx);
     }
 
-    foreach (var tunnel in m_Tunnels)
+    foreach (var tunnelCarvingDatum in m_TunnelCarvingData)
     {
-      var dir = tunnel.m_Direction;
-      var opp = OppositeDirection(dir);
-      var fromFrame = m_Grid[tunnel.m_FromIndex].m_Frame;
-      var toFrame = m_Grid[tunnel.m_ToIndex].m_Frame;
-      var fromStairs = fromFrame.GetStaircaseFromDirection(dir);
-      var toStairs = toFrame.GetStaircaseFromDirection(opp);
-      Staircase.Connect(fromStairs, toStairs);
+      var frameA = m_Grid[tunnelCarvingDatum.m_FromIndex].m_Frame;
+      var frameB = m_Grid[tunnelCarvingDatum.m_ToIndex].m_Frame;
+      var staircaseA = frameA.SelectAndActivateStaircase();
+      var staircaseB = frameB.SelectAndActivateStaircase();
+
+      Dungeon.RegisterTunnel(staircaseA, staircaseB);
     }
   }
 

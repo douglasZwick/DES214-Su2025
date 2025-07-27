@@ -67,17 +67,17 @@ public class RoomData
   public DoorData m_Doors = new();
   public Tags m_Tags = new();
 
-  [HideInInspector]
+  [SerializeReference]
   public Vector2Int m_Index = new();
-  [HideInInspector]
+  [SerializeReference]
   public RoomData m_Next;
-  [HideInInspector]
+  [SerializeReference]
   public RoomData m_Prev;
-  [HideInInspector]
+  [SerializeReference]
   public List<RoomData> m_TunnelConnections = new();
-  [HideInInspector]
+  [SerializeReference]
   public Frame m_Frame;
-  [HideInInspector]
+  [SerializeReference]
   public ArcPhase m_Phase = ArcPhase.Setup;
 
   public bool IsStart

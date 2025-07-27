@@ -11,11 +11,6 @@ public class Frame : MonoBehaviour
   public GameObject m_BlockW;
 
   [Header("Stairs")]
-  public Staircase m_StaircaseN;
-  public Staircase m_StaircaseS;
-  public Staircase m_StaircaseE;
-  public Staircase m_StaircaseW;
-
   public List<Staircase> m_Stairs = new();
 
   [HideInInspector]
@@ -26,13 +21,9 @@ public class Frame : MonoBehaviour
   {
     m_RoomData = roomData;
 
-    BlockSetup();
-    StairSetup();
-  }
+    for (var i = 0; i < m_Stairs.Count; ++i)
+      m_Stairs[i].Setup(m_RoomData, i);
 
-
-  void BlockSetup()
-  {
     m_BlockN.SetActive(!m_RoomData.m_Doors.m_N);
     m_BlockS.SetActive(!m_RoomData.m_Doors.m_S);
     m_BlockE.SetActive(!m_RoomData.m_Doors.m_E);
@@ -40,39 +31,21 @@ public class Frame : MonoBehaviour
   }
 
 
-  void StairSetup()
+  public Staircase SelectAndActivateStaircase()
   {
-    var tunnelConnections = m_RoomData.m_TunnelConnections;
-    var staircaseExceptions = new List<Staircase>();
+    var candidates = m_Stairs.Where(stair =>
+      !stair.gameObject.activeSelf).ToList();
 
-    for (var i = 0; i < tunnelConnections.Count; ++i)
+    if (candidates.Count <= 0)
     {
-      var otherRoom = tunnelConnections[i];
-      var staircase = SelectStaircase(staircaseExceptions);
-      staircaseExceptions.Add(staircase);
-
-      // TODO: Pick it up here I guess
+      Debug.LogError($"Frame {name} tried to select a staircase, " +
+        "but there were no unused staircases left!");
     }
-  }
 
-
-  public Staircase GetStaircaseFromDirection(Direction direction)
-  {
-    return direction switch
-    {
-      Direction.N => m_StaircaseN,
-      Direction.S => m_StaircaseS,
-      Direction.E => m_StaircaseE,
-      _ => m_StaircaseW,
-    };
-  }
-
-
-  Staircase SelectStaircase(List<Staircase> exceptions)
-  {
-    var candidates = m_Stairs.Except(exceptions).ToList();
     var index = Random.Range(0, candidates.Count);
+    var staircase = candidates[index];
+    staircase.gameObject.SetActive(true);
 
-    return candidates[index];
+    return staircase;
   }
 }
