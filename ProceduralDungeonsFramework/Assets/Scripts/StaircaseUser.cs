@@ -5,6 +5,7 @@ public class StaircaseUser : MonoBehaviour
 {
   Transform m_Tx;
   Staircase m_CurrentTarget;
+  bool m_InTunnel = false;
 
 
   void Awake()
@@ -46,6 +47,8 @@ public class StaircaseUser : MonoBehaviour
 
     m_CurrentTarget = stairs.m_Target;
     m_Tx.position = m_CurrentTarget.m_LandingPointTransform.position;
+
+    Dungeon.UseStairs(this, stairs);
   }
 
 

@@ -119,6 +119,12 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &803566148 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8947382643283175849, guid: 7a053a6a7724e9c44801d15db5956f97,
+    type: 3}
+  m_PrefabInstance: {fileID: 3510604577108242030}
+  m_PrefabAsset: {fileID: 0}
 --- !u!850595691 &1082484957
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -229,6 +235,11 @@ PrefabInstance:
       propertyPath: m_FollowTarget
       value: 
       objectReference: {fileID: 1483142281}
+    - target: {fileID: -7582800707053828281, guid: aafb2f36cfda85044b4b753ef5515a13,
+        type: 3}
+      propertyPath: m_TunnelRoomRoot
+      value: 
+      objectReference: {fileID: 3510604577108242031}
     - target: {fileID: 7919622609660554410, guid: aafb2f36cfda85044b4b753ef5515a13,
         type: 3}
       propertyPath: m_Duration
@@ -294,6 +305,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aafb2f36cfda85044b4b753ef5515a13, type: 3}
+--- !u!4 &1390973398 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1999977655657076004, guid: 7a053a6a7724e9c44801d15db5956f97,
+    type: 3}
+  m_PrefabInstance: {fileID: 3510604577108242030}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1483142281 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1251368257008023434, guid: fc37f8548e748f04f99984295524785e,
@@ -368,6 +385,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fc37f8548e748f04f99984295524785e, type: 3}
+--- !u!1 &1504041360 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1251368257008023425, guid: fc37f8548e748f04f99984295524785e,
+    type: 3}
+  m_PrefabInstance: {fileID: 1504041359}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1518111460
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,6 +443,10 @@ MonoBehaviour:
   m_InteriorPrefabs: []
   m_DebuggingLevel: 0
   m_EnsureTunnel: 0
+  m_GoldenPath: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &1518111464
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -432,9 +459,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a8c448f0d707ef4e868a87f9a0472eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_DungeonRoot: {fileID: 1118362778}
+  m_Events:
+    e_BuildRequest:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1518111463}
+          m_TargetAssemblyTypeName: PhasedGridDungeonBuilder, Assembly-CSharp
+          m_MethodName: OnBuildRequest
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    e_BuildComplete:
+      m_PersistentCalls:
+        m_Calls: []
+  m_DungeonRoot: {fileID: 1118362779}
   m_TunnelRoom: {fileID: 3510604577108242032}
+  m_TunnelRoomExitTargetA: {fileID: 803566148}
+  m_TunnelRoomExitTargetB: {fileID: 1390973398}
   m_RoomSize: {x: 16, y: 11}
+  m_Hero: {fileID: 1504041360}
 --- !u!1001 &3510604577108242030
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -497,11 +546,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TunnelRoom
-      objectReference: {fileID: 0}
-    - target: {fileID: 9207195730824377673, guid: 7a053a6a7724e9c44801d15db5956f97,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

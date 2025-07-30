@@ -37,7 +37,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   public DebuggingLevel m_DebuggingLevel = DebuggingLevel.Off;
   public bool m_EnsureTunnel = false;
 
-  Transform m_DungeonTx;
+  Transform m_DungeonRoot;
   Dictionary<Vector2Int, RoomData> m_Grid;
   Vector2 m_RoomSize;
   [SerializeReference]
@@ -76,19 +76,12 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
   }
 
 
-  void Awake()
+  public void OnBuildRequest(DungeonEventData dungeonED)
   {
-    var dungeon = GetComponent<Dungeon>();
-    m_DungeonTx = dungeon.m_DungeonRoot.transform;
-    m_Grid = dungeon.m_Grid;
-    m_RoomSize = dungeon.m_RoomSize;
+    m_DungeonRoot = dungeonED.m_DungeonRoot;
+    m_Grid = dungeonED.m_Grid;
+    m_RoomSize = dungeonED.m_RoomSize;
 
-    dungeon.e_BuildRequest += OnBuildRequest;
-  }
-
-
-  void OnBuildRequest(DungeonEventData _)
-  {
     CarveGoldenPath();
     // CarveExtras();
 
@@ -359,7 +352,7 @@ public class PhasedGridDungeonBuilder : MonoBehaviour
       // For now we're just using the one and only frame prefab, but we'll
       //   replace this later
       var frame = Instantiate(m_FramePrefabs[0],
-        roomPosition, Quaternion.identity, m_DungeonTx);
+        roomPosition, Quaternion.identity, m_DungeonRoot);
 
       roomData.m_Frame = frame;
       frame.Setup(roomData);
